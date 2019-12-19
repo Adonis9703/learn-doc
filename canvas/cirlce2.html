@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>圆环放大</title>
+</head>
+<body>
+<canvas id="canvas" width="800" height="600" class="canvas"></canvas>
+<script>
+  window.onload = function () {
+    const canvas = document.getElementById('canvas')
+    const ctx = canvas.getContext('2d')
+    canvas.addEventListener('mousedown', getMouse, false)
+
+    console.log(canvas.getBoundingClientRect())
+    function getMouse(value) {
+      console.log(value.clientX, value.clientY)
+    }
+
+    function Circle(x, y, r, color, step) {
+      this.x = x
+      this.y = y
+      this.r = r
+      this.bold = 10
+      this.color = color
+      this.step = step
+    }
+
+    Circle.prototype.render = function () {
+      ctx.beginPath()
+      ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI)
+      ctx.closePath()
+      ctx.strokeStyle = this.color
+      ctx.lineWidth = this.bold
+      ctx.stroke()
+    }
+
+    Circle.prototype.update = function () {
+      this.bold += this.step
+      this.r += this.step
+      if (this.r >= 1200) {
+        this.bold = 10
+        this.r = 10
+      }
+    }
+    let circle = new Circle(canvas.width/4, canvas.height/2, 10, 'rgba(244,43,8,.35)',4)
+    let circle2 = new Circle(3*canvas.width/4, canvas.height/2, 10, 'rgba(74,188,255,.35)',4)
+    let circle3 = new Circle(2*canvas.width/4, canvas.height/2, 10, 'rgba(149,247,255,.35)', 6)
+    setInterval(() => {
+      ctx.clearRect(0, 0, 800, 600)
+      circle.render()
+      circle.update()
+      circle2.render()
+      circle2.update()
+      circle3.render()
+      circle3.update()
+    }, 5)
+  }
+</script>
+</body>
+<style>
+    body {
+        margin: 0;
+        padding: 100px 0 0 0;
+    }
+
+    .canvas {
+        background-color: rgba(0, 0, 0, 0.13);
+    }
+</style>
+</html>
