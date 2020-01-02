@@ -1,6 +1,6 @@
 <template>
     <div>
-        <canvas id="canvas" width="740" height="600" class="canvas"></canvas>
+        <canvas id="canvas" width="740" height="250" class="canvas"></canvas>
     </div>
 </template>
 
@@ -45,6 +45,6 @@
 
 <style scoped>
     .canvas {
-        background-color: rgba(0, 0, 0, 0.13);
+
     }
 </style>

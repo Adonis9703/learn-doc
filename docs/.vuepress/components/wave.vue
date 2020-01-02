@@ -15,7 +15,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 600px;
         position: relative;
         width: 740px;
         height: 200px;
