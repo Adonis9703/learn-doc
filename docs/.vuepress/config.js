@@ -4,6 +4,7 @@ module.exports = {
   themeConfig: {
     sidebar: [
       '/welcome/',
+      '/notes/',
       {
         title: '游乐场',
         children: [
@@ -11,7 +12,8 @@ module.exports = {
           '/css/'
         ]
       },
-    ]
+    ],
+    lastUpdated: '上次更新时间'
   },
   sidebar: {}
 }
