@@ -4,7 +4,13 @@ module.exports = {
   themeConfig: {
     sidebar: [
       '/welcome/',
-      '/notes/',
+      {
+        title: '笔记',
+        children: [
+          '/notes/',
+          '/vue/'
+        ]
+      },
       {
         title: '游乐场',
         children: [

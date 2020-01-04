@@ -1,5 +1,5 @@
 ---
-title: 笔记
+title: JavaScript
 ---
 
 # 常用方法
