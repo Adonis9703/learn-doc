@@ -4,6 +4,18 @@ title: 笔记
 
 # 常用方法
 
+## Array.map() 和 Array.filter()
+
+- `map()`：每项调用函数处理后的值存放到返回到新数组中。
+- `filter()`：每项调用函数处理后的值 决定 该项是否应该放在方法返回的新数组中。
+
+```javascript
+const arr = [2, 4, 6, 8, 10]
+
+const doubled = arr.map(num => num * 2) // [4, 8, 12, 20]
+const even = arr.filter(num => num % 3 === 0) // [6]
+```
+
 ## Array.reduce()
 
 `Array.reduce()` 接收两个参数：一个是对数组每个元素执行的回调方法，一个是初始值。
@@ -14,7 +26,6 @@ title: 笔记
 let newArr = [].reduce((accumulator, current => {
   return accumulator
 }), 0)
-
 ```
 要理解 reducer 的第一点也是最重要的一点是它永远返回一个值，这个值可以是数字、字符串、数组或对象，但它始终只能是一个。reducer 对于很多场景都很适用，但是它们对于将一种逻辑应用到一组值中并最终得到一个单一结果的情况特别适用。
 另外需要说明：reducer 本质上不会改变你的初始值；相反，它们会返回一些其他的东西。
@@ -24,7 +35,6 @@ let newArr = [].reduce((accumulator, current => {
 let total = [1, 2, 3].reduce((sum, cur) => {
   return sum + cur
 }, 0)
-
 // 6
 ```
 
@@ -55,6 +65,28 @@ let counts = nums.reduce((obj, num) =>{
 }, {})
 //给定一个空对象{}作为初始值
 // {'1': 3, '2': 2, '4': 1, '5': 1, '33': 2}
+```
+- 数组扁平化
+用 `reduce` 实现 `flat`
+```javascript
+let arr = [1, 2, 3, [4, 5, [6,7]], '8', {num: 9}]
+
+const flat = arr => {
+  return arr.reduce((pre, cur) => {
+    return pre.concat(Array.isArray(cur) ? flat(cur) : cur); //递归展开
+  }, []);
+};
+// [1, 2, 3, 4, 5, 6, 7, '8', {num: 9}]
+```
+> ES2019中引入了扁平化数组的新方法 `flat()`, 完整语法是：
+```javascript
+array.flat([depth]) //depth: 深度值 1 - Infinity
+
+const deep = [1, 2, [3 , [4, 5, [6]]]]
+
+deep.flat()         // [1, 2, 3 , [4, 5, [6]]
+deep.flat(2)        // [1, 2, 3, 4, 5, [6]]
+deep.flat(Infinity) // [1, 2, 3, 4, 5, 6]
 ```
 
 ## 数组去重
