@@ -19,7 +19,7 @@ module.exports = {
         ]
       },
     ],
-    lastUpdated: '上次更新时间'
+    lastUpdated: '上次更新时间',
   },
   sidebar: {}
 }

@@ -4,16 +4,65 @@ title: JavaScript
 
 # 常用方法
 
-## Array.map() 和 Array.filter()
-
-- `map()`：每项调用函数处理后的值存放到返回到新数组中。
-- `filter()`：每项调用函数处理后的值 决定 该项是否应该放在方法返回的新数组中。
+## 几种数组方法的区别
 
 ```javascript
-const arr = [2, 4, 6, 8, 10]
+let arr = [1, 2, 3, 4, 5, 6, 7]
+```
 
-const doubled = arr.map(num => num * 2) // [4, 8, 12, 20]
-const even = arr.filter(num => num % 3 === 0) // [6]
+- forEach()
+```javascript
+/**
+* 没有返回值，只针对每个元素调用func
+* 无法break, return终止循环
+**/
+arr.forEach((item, index) => {
+  console.log(item) // 1, 2, 3, 4, 5, 6, 7
+})
+```
+
+- map()
+```javascript
+/** 
+* 有返回值，返回一个新的数组，每个元素为调用func后的结果
+**/
+let newArr = arr.map((item, index) => {
+  return item * 2
+})
+
+console.log(newArr) // [2, 4, 6, 8, 10, 12, 14]
+```
+
+- some()
+```javascript
+/**
+* 返回一个Boolean, 判断是否有元素符合func，如果有一个符合条件，就会终止循环，返回true
+**/
+
+arr.some((item, index) => {
+  return item > 5 //true
+})
+```
+- every()
+```javascript
+/**
+* 返回一个Boolean，判断每一个元素是否都符合func，如果有一个不符合，就会终止循环，返回false
+**/
+arr.every((item, index) => {
+  return item < 10
+})
+```
+
+- filter()
+```javascript
+/** 
+* 有返回值，返回一个符合func条件的数组的集合
+**/
+let newArr = arr.filter((item, index) => {
+  return item > 3
+})
+
+console.log(newArr) // [4, 5, 6, 7]
 ```
 
 ## Array.reduce()
