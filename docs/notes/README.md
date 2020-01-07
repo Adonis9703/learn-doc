@@ -52,7 +52,6 @@ arr.every((item, index) => {
   return item < 10
 })
 ```
-
 - filter()
 ```javascript
 /** 
@@ -63,6 +62,28 @@ let newArr = arr.filter((item, index) => {
 })
 
 console.log(newArr) // [4, 5, 6, 7]
+```
+- reduce()
+```javascript
+/**
+* 让数组中的前项和后项做某种运算，并返回运算结果
+**/
+let res = arr.reduce((prev, next) => {
+  return prev+next
+})
+console.log(res) //28
+```
+- find()
+```javascript
+/**
+* 不创建新数组，不改变原数组
+* 在判断中一旦某个元素符合func，立马跳出循环，返回当前符合条件的元素
+**/
+let res = arr.find((item, index) => {
+  return item > 3
+})
+
+console.log(res) //4
 ```
 
 ## Array.reduce()
