@@ -7,7 +7,8 @@ module.exports = {
       {
         title: '笔记',
         children: [
-          '/notes/',
+          '/javascript/',
+          '/style/',
           '/vue/'
         ]
       },
@@ -21,5 +22,7 @@ module.exports = {
     ],
     lastUpdated: '上次更新时间',
   },
-  sidebar: {}
+  sidebar: {},
+  postcss: [require('autoprefixer')],
+  sass: {indentedSyntax: true}
 }

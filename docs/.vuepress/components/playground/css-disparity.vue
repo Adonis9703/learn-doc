@@ -21,7 +21,7 @@
                 content
             </div>
             <div class="att-back3">
-                <div class="content">content</div>
+                <div class="content clip">content</div>
             </div>
         </section>
     </div>
@@ -42,19 +42,19 @@
     }
     .att-back1 {
         background-size: 100% 100%;
-        background: url("../public/library.jpg") fixed center center;
+        background: url("../../public/library.jpg") fixed center center;
         height: 300px;
     }
 
     .att-back2 {
         background-size: 100% 100%;
-        background: url("../public/lake.jpg") fixed center center;
+        background: url("../../public/lake.jpg") fixed center center;
         height: 300px;
     }
 
     .att-back3 {
         background-size: 100% 100%;
-        background: url("../public/playground.jpg") fixed center center;
+        background: url("../../public/playground.jpg") fixed center center;
         height: 300px;
     }
 
@@ -85,5 +85,9 @@
         width: 200px;
         height: 200px;
         background-color: rgba(50, 93, 255, 0.5);
+    }
+    .clip {
+        /*background-clip: text;*/
+        /*-webkit-text-fill-color: transparent;*/
     }
 </style>

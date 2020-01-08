@@ -1,4 +1,4 @@
 ---
 title: canvas
 ---
-<canvas-circle-around/>
+<playground-canvas-circle-around/>

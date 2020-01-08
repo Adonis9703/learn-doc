@@ -2,7 +2,7 @@
 title: JavaScript
 ---
 
-# 常用方法
+# JavaScript
 
 ## 几种数组方法的区别
 
