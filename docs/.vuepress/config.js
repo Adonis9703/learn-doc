@@ -8,8 +8,13 @@ module.exports = {
         title: '笔记',
         children: [
           '/javascript/',
-          '/style/',
-          '/vue/'
+          {
+            title: 'style',
+            children: [
+              '/style/flex/'
+            ]
+          },
+          '/vue/',
         ]
       },
       {

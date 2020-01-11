@@ -1,17 +1,15 @@
 ---
-title: Style
+title: FLex
 ---
 
-# STYLE
-
-## Flex
+# Flex
 
 使用flex布局首先要设置父容器 `display: flex`，然后再设置 `justify-content: center` 实现水平居中，最后设置 `align-items: center`实现垂直居中。
 
 flex的核心概念是 **容器** 和 **轴**。容器包括外层的 **父容器** 和 内层的 **子容器**，轴包括 **主轴** 和 **交叉轴**。
 flex布局涉及到12个CSS属性（不含display: flex），其中父容器、子容器各6个。常用的属性只有4个，父子各2各。
 
-### 1.容器
+## 容器
 
 父级可以统一设置子容器的排列方式，子容器也可以单独设置自身的排列方式，同时设置时以子容器为准。
 
@@ -106,7 +104,7 @@ flex布局涉及到12个CSS属性（不含display: flex），其中父容器、�
 ```
 <notes-css-flex type="12"/>
 
-### 2.轴
+## 轴
 
 轴包括**主轴**和**交叉轴**，`justify-content`属性决定子容器沿主轴的排列方式，`align-items`属性决定子容器沿着交叉轴的排列方式。
 在flex布局中，`flex-direction`属性决定主轴的方向，交叉轴的方向由主轴确定。
@@ -139,7 +137,7 @@ flex布局涉及到12个CSS属性（不含display: flex），其中父容器、�
 
 <notes-css-flex type="16"/>
 
-## Flex进阶
+## 进阶
 
 #### 父容器
 
