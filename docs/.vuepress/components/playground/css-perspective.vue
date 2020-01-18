@@ -1,12 +1,12 @@
 <template>
     <div style="" @mouseover="checkMouse">
         <section class="back" >
-            <div style="font-weight: bold;padding-bottom: 20px;">perspective</div>
+            <div style="font-weight: bold;padding-bottom: 20px;">perspective共享</div>
             <div v-for="(item, index) of 15" class="item" :key="index"
                  :style="`transform: rotateY(${rotateY}deg);`+'background-color:' + `rgba(${120 + 15* (item+1)}, ${10 + 5* (item+1)}, ${15 + 12* (item+1)}, 0.8)`"></div>
         </section>
         <section class="back-origin" style="clear: both">
-            <div style="font-weight: bold;padding: 20px 0;">perspective-origin</div>
+            <div style="font-weight: bold;padding: 20px 0;">perspective独立</div>
             <div v-for="(item, index) of 15" class="item-origin" :key="index"
                  :style="`transform: rotateY(${rotateY}deg);`+'background-color:' + `rgba(${255}, ${255 - 15* (item+1)}, ${200 - 12* (item+1)}, 0.8)`"></div>
         </section>
