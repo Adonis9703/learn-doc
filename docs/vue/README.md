@@ -327,6 +327,75 @@ https://www.cnblogs.com/chris-oil/p/11268659.html
 </script>
 ```
 
+## Vue3 中的实现方式
+
+https://www.jianshu.com/p/1fbffbd0a80c
+在Vue3中放弃使用了`Object.defineProperty`, 选用了更快的原生`Proxy`
+
+在Vue2.x中基于`Object.defineProperty`的实现存在很多限制：无法监听**属性的添加和删除、数组索引和长度的变更**，并可以支持
+`Map`、`Set`、`WeakMap`和`WeakSet`
+
+#### Proxy?
+
+> `Proxy`对象用于定义基本操作的自定义行为（如属性查找、赋值、枚举、函数调用等）。
+
+通过代理的方式，不操作对象本身，反而通过操作**代理对象**来间接操作对象。
+
+```javascript
+let obj = { a: 1}
+let proxyObj = new Proxy(obj, {
+  get: function(target, prop) {
+    return prop in target ? target[prop] : 0 //注释1
+  },
+  set: function(target, prop, newVal) {
+    target[prop] = newVal
+    return true //需要return 一个Boolean 设置成功为true 设置失败为false
+  }
+})
+
+console.log(proxyObj.a) //1
+console.log(proxyObj.b) //0
+
+proxyObj.a = 666
+console.log(proxyObj.a) //666
+```
+>注释1 `in`关键字 可以判断对象是否是数组/对象的元素/属性
+>格式：（value in Array|Object）
+>当‘对象’为数组时，‘变量’指的是数组的索引
+>当‘对象’为对象时，‘变量’指的是对象的key。
+> ```javascript
+>let arr = [a, b, 1, 2, 'str']
+>console.log('a' in arr) //false
+>console.log(4 in arr)   //true
+>
+>let obj = {a: 'one', b: 'tow', c: 'three'}
+>console.log(2 in obj)   //false
+>console.log('b' in obj) //true
+>```
+
+es6中提供的`Proxy`语法如下：
+
+`let proxy = new Proxy(target, handler)`
+
+参数`target`是用`Proxy`包装的目标对象（可以是任何类型的对象，包括原生数组，函数，甚至是另一个代理），参数`handler`也是一个对象，
+其属性是当执行一个操作时定义代理的行为的函数，也就是自定义的行为。
+
+`handler`可以是空对象`{}`，则表示对代理`proxy`的操作即是对目标对象`target`操作，例如：
+
+```javascript
+let obj = {}
+let proxyObj = new Proxy(obj, {})
+
+proxyObj.a = 1
+proxyObj.fn = function() {
+  console.log('it is a function')
+}
+
+console.log(proxyObj.a) //1
+console.log(obj.a)      //1
+console.log(obj.fn())   //it is a function
+```
+
 ## eventHub
 
 eventHub || eventBus 用于不同组件实例间的数据传递
