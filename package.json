@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/Adonis9703/learn-doc#readme",
   "devDependencies": {
-    "node-sass": "^4.13.0",
-    "sass-loader": "^8.0.0",
-    "vuepress": "^1.2.0"
+    "node-sass": "4.13.0",
+    "sass-loader": "8.0.0",
+    "vuepress": "1.2.0"
   }
 }
