@@ -306,6 +306,8 @@ console.log(Person)
 ![avater](/img-1.png)
 注意：修改的是**属性**而非内容（例如sex）
 
+https://www.cnblogs.com/chris-oil/p/11268659.html
+
 简易双向绑定的实现
 ```html
 <input type="text" id="a">
