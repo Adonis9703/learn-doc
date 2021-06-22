@@ -436,7 +436,20 @@ console.log(obj.fn())   //it is a function
 
 > 注释2 const在声明引用类型变量时（数组或对象），不可变的只是变量绑定的内存地址，而对象的属性可以任意改变
 
-## nextTick 和 setTimeout
+## nextTick
+
+Vue在更新DOM时是**异步**执行的。只要侦听到数据变化，Vue会开启一个队列，并缓冲在同一个事件循环中发生的所有数据变更。如果同一个
+watcher被多次触发，只会被推入到队列中一次。这种在缓冲时去除重复数据对于避免不必要的计算和 DOM 操作是非常重要的。
+然后，在下一个的事件循环“tick”中，Vue 刷新队列并执行实际 (已去重的) 工作。
+Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserver 和 setImmediate，如果执行环境不支持，则会采用 setTimeout(fn, 0) 代替。
+
+`nextTick`是Vue中的更新策略，也是性能优化手段。
+
+#### 应用场景
+1. 在`created()`钩子函数中进行dom操作时一定要在`nextTick()`的回调函数中。
+
+2. 在数据变化后要执行的某个操作，而这个操作需要使用随数据改变而改变的dom结构的时候，这个操作都应该放进`nextTick()`的回调函数中。
+
 
 ## eventHub
 
