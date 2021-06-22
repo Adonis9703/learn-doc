@@ -304,7 +304,7 @@ Person.sex = 'M'
 console.log(Person)
 ```
 ![avater](/img-1.png)
-注意：修改的是**属性**而非内容（例如sex）
+注意：注意name和sex的区别
 
 https://www.cnblogs.com/chris-oil/p/11268659.html
 
@@ -332,7 +332,7 @@ https://www.cnblogs.com/chris-oil/p/11268659.html
 https://www.jianshu.com/p/1fbffbd0a80c
 在Vue3中放弃使用了`Object.defineProperty`, 选用了更快的原生`Proxy`
 
-在Vue2.x中基于`Object.defineProperty`的实现存在很多限制：无法监听**属性的添加和删除、数组索引和长度的变更**，并可以支持
+这将会消除在Vue2.x中基于`Object.defineProperty`的实现存在很多的限制：无法监听**属性的添加和删除、数组索引和长度的变更**，并可以支持
 `Map`、`Set`、`WeakMap`和`WeakSet`
 
 #### Proxy?
@@ -395,6 +395,48 @@ console.log(proxyObj.a) //1
 console.log(obj.a)      //1
 console.log(obj.fn())   //it is a function
 ```
+
+#### 通过Proxy实现简单双向数据绑定
+
+```html
+<input id="input" type="text">
+<span id="span"></span>
+
+<script>
+    const input = document.getElementById('input')
+    const span = document.getElementById('span')
+    
+    //需要代理的对象
+    const obj = {
+      text: 'hello world'
+    } //注释2
+    
+    const handler = {
+      set: function(target, prop, value) {
+        if (prop === 'text') {
+          console.log('代理拦截 set: ', value)
+          target[prop] = value
+          span.innerHTML = value
+          input.value = value
+          console.log('修改后的obj', obj)
+          return true
+        } else {
+          return false
+        }
+      }
+    }
+    //建立代理
+    const proxyObj = new Proxy(obj, handler)
+    input.addEventListener('input', function(e) {
+      proxyObj.text = e.target.value
+    }, false)
+</script>
+```
+![avater](/img-2.png)
+
+> 注释2 const在声明引用类型变量时（数组或对象），不可变的只是变量绑定的内存地址，而对象的属性可以任意改变
+
+## nextTick 和 setTimeout
 
 ## eventHub
 

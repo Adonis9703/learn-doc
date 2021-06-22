@@ -4,6 +4,162 @@ title: JavaScript
 
 # JavaScript
 
+## EventLoop
+
+先看例子
+
+```html
+<div id="example">{{msg}}</div>
+<script>
+const vm = new Vue({
+    el: '#example',
+    data: {
+      msg: '123'
+    }
+})
+vm.msg = 'new message'
+
+console.log(1)
+console.log(vm.$el.innerText)
+console.log(2)
+Vue.nextTick(() => {
+  console.log(vm.$el.innerText)
+})
+console.log(3)
+//输出结果
+//1
+//123
+//2
+//3
+//new message
+</script>
+```
+为什么最后打印的是'new message'而不是代码最后的3，为什么第一次打印vm.$el.innerText是123而不是赋值后的'new message'？
+
+#### JavaScript EventLoop
+
+JavaScript的最大特点就是单线程，虽然在h5中允许JavaScript脚本创建多个子线程，但是子线程完全收到主线程控制，且**不得**操作DOM，所以其本质依然是单线程。
+
+#### 任务队列
+
+单线程意味着所有任务需要排队，只有前一个任务结束，才会执行下一个任务。
+
+于是，所有任务可以分成两种，一种是**同步任务（synchronous）**，另一种是**异步任务（asynchronous）**。同步任务指，在主线程上排队执行的任务，
+只有前一个任务执行完毕，才能执行下一个任务；异步任务指的是，不进入主线程，而是进入**任务队列（task queue）**的任务，只有任务队列通知主线程，某个异步任务可以执行了，
+该任务才会进入主线程执行。
+
+具体来说，异步执行的运行机制如下（同步执行也如此，因为它可以被视为没有异步任务的异步执行）。
+
+> 1. 所有同步任务都在主线程上执行，形成一个**执行栈（execution context stack）**
+> 2. 主线程之外，还存在一个**任务队列（task queue）**。只要异步任务有了运行结果，就在**任务队列**中放置一个事件。
+> 3. 一旦**执行栈**中所有的同步任务执行完毕，系统就会读取**任务队列**，看看里面有哪些事件。那些对应的异步任务结束等待状态，
+进入执行栈，开始执行。
+> 4. 主线程不断重复第三步。
+
+![avater](/eventloop.png)
+
+主线程在运行的时候会产生堆栈，堆用于存储变量，栈用于记录执行的顺序。如果碰到回调函数、dom操作比如click、hover等、setTimeout操作就会放到
+任务队列，只有栈中的代码执行完毕才会从任务队列取出代码，进行执行。所以这就是为什么在上面的例子中，`console.log(3)`在代码最后，但是比nextTick
+里的代码先输出。
+
+#### 微任务、宏任务
+
+上面的任务队列分为两种，执行顺序也有所差别，分别Macrotasks和Microtasks。
+
+- Macrotasks: setTimeout, setInterval, setImmediate, I/O, UI rendering
+- Microtasks: process.nextTick, Promise, Object.observe(废弃), MutationObserver
+
+```javascript
+console.log(1)
+setTimeout(() => {
+  console.log(2)
+}, 0)
+Promise.resolve().then(() => {
+  console.log(3)
+}).then(()=> {
+  console.log(4)
+})
+console.log(5)
+//输出结果：
+//1
+//5
+//3
+//4
+//2
+```
+`Promise.then()`方放的函数会被推入microtasks队列，而`setTimeout`的任务会被推入macrotasks队列。
+在每一次的事件循环中，macrotasks只会提取一个执行，而microtasks会一直提去，直到microtasks队列清空。
+
+1. microtask会优先macrotask执行
+2. microtasks会被循环提取到执行引擎主线程的执行栈，知道microtasks任务队列清空，才会执行macrotask
+
+```javascript
+ console.log('script start') 
+  async function async1() {
+    await async2() 
+    console.log('async1 end')
+  }
+  async function async2() {
+    console.log('async2 end')
+  }
+  async1() 
+  setTimeout(() => {
+    console.log('setTimeout')
+  }, 0)
+
+  new Promise(resolve => { 
+    console.log('Promise') 
+    resolve()
+  }).then(() => {
+    console.log('promise1')
+  }).then(() => {
+    console.log('promise2')
+  })
+  console.log('script end') 
+   //输出结果
+    //script start
+    //async2 end
+    //Promise
+    //script end
+    //async1 end
+    //promise1
+    //promise2
+    //setTimeout
+```
+
+尝试理清以上代码的执行顺序，解答如下：
+
+```javascript
+  console.log('script start')  //第1步 打印'script start'
+
+  async function async1() {
+    await async2() //第2.5步 运行async2 并把下一句代码推入microtasks队列 
+    console.log('async1 end')
+     //此处相当于 Promise.then(()=>{ console.log('async1 end') }) 第6步 打印
+  }
+
+  async function async2() {
+    console.log('async2 end') //第3步 打印'async2 end'
+  }
+
+  async1() //第2步 运行async1
+  
+  setTimeout(() => { //第3.5步 将setTimeout推入macrotasks队列
+    console.log('setTimeout') //第9步
+  }, 0)
+
+  new Promise(resolve => { 
+    console.log('Promise') //第4步 打印'Promise' 
+    // 注意：是Promise.then()之后的任务会被推入队列
+    resolve()
+  }).then(() => { //第4.5步 将后续Promise.then()推入microtasks队列
+    console.log('promise1') //第7步
+  }).then(() => {
+    console.log('promise2') //第8步
+  })
+  console.log('script end') //第5步 打印'script end' 此时主线程完成，
+                            // 接着将microtasks和macrotasks中的任务顺序执行
+```
 ## 几种数组方法的区别
 
 ```javascript
