@@ -436,6 +436,60 @@ console.log(obj.fn())   //it is a function
 
 > 注释2 const在声明引用类型变量时（数组或对象），不可变的只是变量绑定的内存地址，而对象的属性可以任意改变
 
+## Reflect & Proxy
+
+上一节介绍了`Proxy`，这里也提一下`Reflect`（反射）
+
+`Reflect`存在的意义：
+
+1. 将`Object`对象的一些内部方法，放到`Reflect`对象上。比如`Object.defineProperty`。也就是说，从Reflect对象上可以拿到语言内部的方法。
+> 现阶段这些方法存在于`Object`和`Reflect`对象上，未来将只存在与`Reflect`对象上
+
+2. 修改某些`Object`方法的返回结果，让其变得更合理。比如：`Object.defineProperty(obj, name, desc)`在无法定义属性时，会抛出一个错误，
+定义成功时返回修改后的对象。而`Reflect.defineProperty(obj, name, desc)`在定义属性成功时返回`true`，在失败时返回`false`。
+
+```javascript
+//old
+try {
+  Object.defineProperty(target, property, attributes)
+  //success
+} catch (e) {
+  //failure
+}
+//new
+if (Reflect.defineProperty(target, property, attributes)) {
+  // success
+} else {
+  //failure
+}
+```
+3. 让`Object`操作都变成函数行为。某些`Object`操作是命令式的，比如`name in obj`和`delete obj[name]`，而`Reflect.has(obj, name)`
+和`Reflect.deleteProperty(obj, name)`让它们变成了函数行为。
+
+```javascript
+//old
+'assgin' in Object //true
+//new
+Reflect.has(Object, 'assign') //true
+```
+4. `Reflect`对象的方法与`Proxy`对象的方法一一对应，只要是`Proxy`对象的方法，就能在`Reflect`对象上找到对应的方法。
+这就让`Proxy`对象可以方便地调用对应的`Reflect`方法，完成默认行为，作为修改行文的基础。也就是说，不管`Proxy`怎么修改默认行为，
+总可以在`Reflect`上获取默认行为。
+
+```javascript
+let obj = {}
+let proxyObj = new Proxy(obj, {
+  get(target, name) {
+    console.log('get', target, name)
+    return Reflect.get(target, name)
+  },
+  has(target, name) {
+    console.log('has' + name)
+    return Reflect.has(target, name)
+  }
+}) 
+```
+
 ## nextTick
 
 Vue在更新DOM时是**异步**执行的。只要侦听到数据变化，Vue会开启一个队列，并缓冲在同一个事件循环中发生的所有数据变更。如果同一个
