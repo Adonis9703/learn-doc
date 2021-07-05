@@ -9,6 +9,8 @@ module.exports = {
         children: [
           '/javascript/',
           '/vue/',
+          '/web/',
+          '/面试/',
           {
             title: 'Style',
             children: [
