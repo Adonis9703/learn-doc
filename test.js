@@ -113,17 +113,16 @@
 // console.log(obj.val)
 
 //3.使用call、apply
-
-//function.call(this, args...)
-//function.apply(this, [args])
-
-
+//
+// function.call(this, args...)
+// function.apply(this, [args])
+//
+//
 // function Func(x, y) {
 // return x + y
 // }
-
+//
 // console.log(Func.call(null, 1, 2))
-
 // console.log(Func.apply(null, [1, 2]))
 
 
@@ -156,7 +155,7 @@
 
 //防抖
 //触发高频事件后n秒内函数只会执行一次，如果n秒内高频事件再次触发，则重新计算时间
-
+//
 // function debounce(fn) {
 //   let timer = null //创建一个标记用来存放定时器
 //   return function () {
@@ -196,7 +195,7 @@
 //     }, 500)
 //   }
 // }
-
+//
 // function checkThrottle() {
 //   console.log('节流测试')
 // }
@@ -240,42 +239,42 @@
 //
 // console.log(arr.__proto__)
 // console.log(func.__proto__)
-//
+
 // //函数具有 prototype
 // console.log(func.prototype)
 
 //原型
 
-function Foo(name, age) {
-  this.name = name
-  this.age = age
-}
-Foo.prototype.printName = function () {
-  console.log(this.name)
-}
+// function Foo(name, age) {
+//   this.name = name
+//   this.age = age
+// }
+// Foo.prototype.printName = function () {
+//   console.log(this.name)
+// }
+//
+// let obj = new Foo('Adonis', 10)
+//
+// obj.printAge = function () {
+//   console.log(this.age)
+// }
+//
+// obj.printAge()
+// console.log(obj)
+// obj.printName() //当试图获得一个对象的某个属性时，如果这个对象本身没有这个属性，那么会去它的__proto__(即它的构造函数的prototype)
+//                 //中寻找，因此obj.printName 就会找到 Foo.prototype.printName
+//
+// //那么如何判断某个属性是否是对象本身的属性？可以使用 hasOwnProperty，常用于遍历一个对象的时候。
+// for(const item in obj) {
+//   //某些高级浏览器已经在for in 中屏蔽了来自原型的属性，但这里加上判断可以保证代码的健壮性
+//   if (obj.hasOwnProperty(item)) {
+//     console.log(item + ':' + obj[item])
+//   }
+// }
 
-let obj = new Foo('Adonis', 10)
-
-obj.printAge = function () {
-  console.log(this.age)
-}
-
-obj.printAge()
-console.log(obj)
-obj.printName() //当试图获得一个对象的某个属性时，如果这个对象本身没有这个属性，那么会去它的__proto__(即它的构造函数的prototype)
-                //中寻找，因此obj.printName 就会找到 Foo.prototype.printName
-
-//那么如何判断某个属性是否是对象本身的属性？可以使用 hasOwnProperty，常用于遍历一个对象的时候。
-for(const item in obj) {
-  //某些高级浏览器已经在for in 中屏蔽了来自原型的属性，但这里加上判断可以保证代码的健壮性
-  if (obj.hasOwnProperty(item)) {
-    console.log(item + ':' + obj[item])
-  }
-}
-
-//原型链 接着上述例子
-
-console.log(obj.toString()) //因为obj本身没有toString，并且obj.__proto__（Foo.prototype）也没有toString，因此将继续在
+// //原型链 接着上述例子
+//
+// console.log(obj.toString()) //因为obj本身没有toString，并且obj.__proto__（Foo.prototype）也没有toString，因此将继续在
 //obj.__proto__.__proto__中寻找。
 //1. obj.__proto__ 即Foo.prototype，没有toString，继续向上寻找
 //2. obj.__proto__.__proto__ 即Foo.prototype.__proto__，即普通的Object对象，因此Foo.prototype.__proto__ === Object.prototype,
@@ -286,7 +285,21 @@ console.log(obj.toString()) //因为obj本身没有toString，并且obj.__proto_
 //原型链中的this
 //所有从原型或更高级原型中得到、执行的方法，其中的this在执行时，就指向了当前这个触发事件执行的对象。因此printName和alertName中的this都是f。
 
+let promise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    if (Math.random() > 0.5) {
+      resolve('resolved')
+    } else {
+      reject('rejected')
+    }
+  }, 1000)
+})
 
+promise.then(res => {
+  console.log(res)
+}, err => {
+  console.log(err)
+})
 
 
 
