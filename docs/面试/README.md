@@ -82,3 +82,39 @@ position:sticky是一个新的css3属性，它的表现类似position:relative�
 2. 必须指定top、bottom、left、right4个值之一，否则只会处于相对定位
 3. 父元素的高度不能低于sticky元素的高度
 4. sticky元素仅在其父元素内生效
+
+
+## new 操作符都做了些什么
+
+1. 创建一个空对象
+2. 将空对象的原型prototype指向构造函数的原型（_proto_属性只想构造函数的原型对象prototype）
+3. 将构造函数的作用域赋值给新对象（this指向新对象）
+4. 执行构造函数内部的代码，将属性添加给新对象
+5. 返回新对象
+
+```javascript
+function _new(func, ...args) {
+  let target = {} //新建空对象
+  target.__proto__ = func.prototype //原型指向构造函数的原型
+  let res = func.apply(target, args) //作用域赋给新对象
+  return res instanceof Object ? res : target //返回新对象
+}
+
+function Origin(sex, age) {
+  this.name = 'name'
+  this.age = age
+  this.sex = sex
+}
+let origin = new Origin('F', 10)
+console.log(origin)
+console.log(_new(Origin, 'M', 20))
+```
+
+## Babel 是如何把ES6转化为ES5的
+
+大致分为三步
+
+1. 将代码字符串解析成抽象语法树，即所谓的`AST(abstract syntax tree)`，是用来表示源代码语法的一种树形结构，树上的每个节点
+都代表源码的一种结构。平时编辑器的代码高亮、代码检查都依靠的是AST。
+2. 对AST进行处理，在这个阶段可以对ES6代码进行相应转换，即转成ES5代码。
+3. 根据处理后的AST再生成代码字符串。
