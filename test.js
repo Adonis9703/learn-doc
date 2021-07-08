@@ -1,3 +1,5 @@
+//https://www.kancloud.cn/freya001/interview/1224405
+
 // call apply bind
 // function Fruits() {}
 //
