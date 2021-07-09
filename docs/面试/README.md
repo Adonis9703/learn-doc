@@ -13,6 +13,87 @@ title: 面试记录
 4. 渲染绘制（重绘），这个过程被称为(Painting 或者 Repaint)。即根据计算好的信息绘制整个页面。
 
 以上4步简述浏览器的一次渲染过程，理论上，每一次的dom更改或者css几何属性更改，都会引起一次浏览器的重排/重绘过程，而如果是css的非几何属性更改，则只会引起重绘过程。所以说重排一定会引起重绘，而重绘不一定会引起重排。
+
+#### 重绘和回流
+
+当元素的样式发生改变时，浏览器需要触发更新，重新绘制元素。在这个过程中，有两种类型的操作，即重绘和回流。
+
+- 重绘（repaint）：当元素样式的改变不影响布局时，浏览器将使用重绘对元素进行更新，此时由于只需要UI层面的重新像素绘制，因此*损耗较少*
+- 回流（reflow）： 当元素的尺寸、结构或触发某些属性时，浏览器会重新渲染页面，称为回流。此时浏览器需要重新计算，计算后重新进行页面布局，
+消耗较大。以下行为会触发回流操作：
+    - 页面初次渲染
+    - 浏览器窗口大小改变
+    - 元素尺寸、位置、内容发生变化
+    - 元素字体大小变化
+    - 添加或删除可见的dom元素
+    - 激活CSS伪类（:hover）
+    - 查询某些属性或调用某些方法：
+        - clientWidth, clientHeight, clientTop, clientLeft
+        - offsetWidth, offsetHeight, offsetTop, offsetLeft
+        - scrollWidth, scrollHeight, scrollTop, scrollLeft
+        - getComputedStyle(), getBoundingClientReact
+        - scrollTo()
+
+*回流必定触发重绘，重绘不一定触发回流。重绘开销较小，回流代价较高*
+
+#### 最佳实践
+
+- css
+    - 避免使用`table`布局
+    - 将动画效果应用到`position`属性为`absolute`或`fixed`的元素上
+
+- javascript
+    - 避免频繁操作样式，可以汇总后统一修改
+    - 尽量使用`class`进行样式修改
+    - 减少`dom`的删减次数，可使用字符串或者`documentFragment`一次性插入
+
+## 浏览器存储
+
+## 浏览器缓存策略
+
+缓存分为强缓存和协商缓存。强缓存不过服务器，协商缓存需要过服务器，协商缓存返回的状态码是304。两类缓存机制可以同时存在，强缓存的优先级高于协商缓存。、
+当执行强缓存时，如若缓存命中，则直接使用缓存数据库中的数据，不再进行缓存协商。
+
+### 强缓存
+
+#### Expires 
+
+在HTTP/1.0时期，通过`Expires`来检查，而在HTTP/1.1中，使用的是`Cache-Control`。
+
+`Expires`即过期时间，存在于服务端返回的*响应头*中，告诉浏览器在这个过期时间之前可以直接从缓存中获取数据而无需再次请求。
+
+```
+Expires: Wed, 22 Nov 2021 09:21:00 GMT
+```
+表示如果在上述时间过期后，需要向服务器重新请求资源。
+
+由于使用的是绝对时间，如果服务端和客户端的时间产生偏差，那么会导致命中缓存产生偏差。
+
+#### Cache-Control
+
+在HTTP1.1中，采用了`Cache-Control`字段来控制缓存，其拥有很多属性：
+
+- private：客户端可以缓存
+- public：客户端和代理服务器都可以缓存
+- max-age=t：缓存将在t秒后失效
+- no-cache：需要使用协商缓存来验证缓存数据
+- no-store：所有内容都不会缓存
+
+请注意no-cache指令很多人误以为是不缓存，这是不准确的，no-cache的意思是可以缓存，但每次用应该去想服务器验证缓存是否可用。no-store才是不缓存内容。
+当在首部字段Cache-Control 有指定 max-age 指令时，比起首部字段 Expires，会优先处理 max-age 指令。命中强缓存的表现形式：Firefox浏览器表现为一个灰色的200状态码。
+Chrome浏览器状态码表现为200 (from disk cache)或是200 OK (from memory cache)。
+
+### 协商缓存
+
+协商缓存需要进行对比判断是否可以使用缓存。浏览器第一次请求数据时，服务器会将缓存标识与数据一起响应给客户端，客户端将它们备份至缓存中。
+再次请求时，客户端会将缓存中的标识发送给服务器，服务器根据此标识判断。若未失效，返回304状态码，浏览器拿到此状态码就可以直接使用缓存数据了。
+
+*Last-Modified*：服务器在响应请求时，会告诉浏览器资源的最后修改时间。
+*if-Modified-Since*：浏览器再次请求服务器的时候，请求头会包含此字段，后面跟着在缓存中获得的最后修改时间。服务端收到此请求头发现有if-Modified-Since，
+则与被请求资源的最后修改时间进行对比，如果一致则返回304和响应报文头，浏览器只需要从缓存中获取信息即可。
+    - 如果真的被修改，那么开始传输响应一个整体，服务器返回：200 OK
+    - 如果没有被修改，那么只需传输响应header，服务器返回：304 Not Modified
+
 ## Promise
 
 > Promise 是异步编程的一种解决方案。
@@ -40,6 +121,48 @@ promise.then(res => {
 }, err => {
   console.log(err) //rejected
 })
+```
+
+## 实现一个类
+
+通过构造函数
+
+```javascript
+function Animal(name, age, color) {
+  this.name = name
+  this.age = age
+  this.color = color
+  //实例方法
+  this.checkColor = function () {
+    console.log('kind: ' + color)
+  }
+}
+//原型方法
+Animal.prototype.printInfo = function() {
+  console.log('name:'+ this.name + ' age:' + this.age)
+}
+
+let cat = new Animal('Pound', 2, 'white')
+
+cat.printInfo()
+cat.checkColor()
+```
+
+ES6 语法糖 `class`
+
+```javascript
+class Person {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
+  }
+  printInfo() {
+    console.log('name:'+ this.name + ' age:' + this.age)
+  }
+}
+
+let me = new Person('adonis', 24)
+me.printInfo()
 ```
 
 ## 原型和原型链
@@ -155,6 +278,122 @@ let foo = {x: 100}
 
 let newFunc = Bar.bind(foo)
 newFunc() //100
+```
+
+## 继承
+
+首先定义一个父类
+
+```javascript
+function Animal(name, age, color) {
+  this.name = name
+  this.age = age
+  this.color = color
+  //实例方法
+  this.checkColor = function () {
+    console.log('kind: ' + color)
+  }
+}
+//原型方法
+Animal.prototype.printInfo = function() {
+  console.log('name:'+ this.name + ' age:' + this.age)
+}
+```
+
+1. 构造函数绑定
+
+```javascript
+function Cat(name, age, color) {
+  Animal.apply(this, arguments)
+}
+let pound = new Cat('pound', 2, 'white')
+pound.checkColor()
+console.log(pound)
+```
+
+2. 原型链继承
+
+```javascript
+Cat.prototype = new Animal()
+Cat.prototype.name = 'newPound'
+
+let cat = new Cat()
+console.log(cat)
+```
+
+3. 实例继承（原型式继承）
+
+```javascript
+function Cat(name, age, color) {
+  return new Animal(...arguments)
+}
+let pound = new Cat('pound', 2, 'white')
+console.log(pound)
+```
+
+4.组合继承
+
+```javascript
+function Cat(name, age, color) {
+  Animal.apply(this, arguments)
+}
+Cat.prototype = new Animal()
+Cat.prototype.constructor = Cat
+
+let pound = new Cat('pound', 2, 'white')
+console.log(pound)
+```
+
+5. 寄生组合继承
+
+```javascript
+function Cat() {
+  //继承父类属性
+  Animal.apply(this, arguments)
+}
+
+(function () {
+  //创建空类
+  let Super = function () {
+  }
+  Super.prototype = Animal.prototype
+  //父类的实例作为子类的原型
+  Cat.prototype = new Super()
+})()
+//修复构造函数指向问题
+Cat.prototype.constructor = Cat
+let pound = new Cat('pound', 2, 'white')
+console.log(pound)
+```
+
+6. ES6`extends`继承
+
+```javascript
+class Animal {
+  constructor(name, age, color) {
+    this.name = name
+    this.age = age
+    this.color = color
+  }
+
+  checkColor() {
+    console.log('color: ' + this.color)
+  }
+}
+
+class Cat extends Animal {
+  constructor(name, age, color) {
+    super(...arguments)
+  }
+
+  checkColor() {
+    super.checkColor()
+  }
+}
+
+let pound = new Cat('pound', 2, 'white')
+
+console.log(pound)
 ```
 
 ## 函数柯里化

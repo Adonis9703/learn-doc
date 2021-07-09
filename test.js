@@ -284,22 +284,175 @@
 //这种链式结构被称为原型链。如果在最上层也没有找到，则返回undefined。
 //原型链中的this
 //所有从原型或更高级原型中得到、执行的方法，其中的this在执行时，就指向了当前这个触发事件执行的对象。因此printName和alertName中的this都是f。
+//
 
-let promise = new Promise((resolve, reject) => {
-  setTimeout(() => {
-    if (Math.random() > 0.5) {
-      resolve('resolved')
-    } else {
-      reject('rejected')
-    }
-  }, 1000)
-})
+// let promise = new Promise((resolve, reject) => {
+//   setTimeout(() => {
+//     if (Math.random() > 0.5) {
+//       resolve('resolved')
+//     } else {
+//       reject('rejected')
+//     }
+//   }, 1000)
+// })
+//
+// promise.then(res => {
+//   console.log(res)
+// }, err => {
+//   console.log(err)
+// })
 
-promise.then(res => {
-  console.log(res)
-}, err => {
-  console.log(err)
-})
+// class Person {
+//   constructor(name, age) {
+//     this.name = name
+//     this.age = age
+//   }
+//   printInfo() {
+//     console.log('name:'+ this.name + ' age:' + this.age)
+//   }
+// }
+//
+// let me = new Person('adonis', 24)
+// me.printInfo()
+
+// function Animal(name, age, color) {
+//   this.name = name
+//   this.age = age
+//   this.color = color
+//   //实例方法
+//   this.checkColor = function () {
+//     console.log('kind: ' + color)
+//   }
+// }
+//
+// //原型方法
+// Animal.prototype.printInfo = function () {
+//   console.log('name:' + this.name + ' age:' + this.age)
+// }
+
+// let cat = new Animal('Pound', 2, 'white')
+//
+// cat.printInfo()
+// cat.checkColor()
+
+// 构造函数绑定
+// function Cat(name, age, color) {
+//   Animal.apply(this, arguments)
+// }
+// let pound = new Cat('pound', 2, 'white')
+// pound.checkColor()
+// console.log(pound)
+
+//原型链继承
+// function Cat() {}
+//
+// Cat.prototype = new Animal()
+// Cat.prototype.name = 'newPound'
+//
+// let cat = new Cat()
+// console.log(cat)
+
+//实例继承（原型式继承）
+
+// function Cat(name, age, color) {
+//   return new Animal(...arguments)
+// }
+// let pound = new Cat('pound', 2, 'white')
+// console.log(pound)
+
+//组合式继承
+// function Cat(name, age, color) {
+//   Animal.apply(this, arguments)
+// }
+// Cat.prototype = new Animal()
+// Cat.prototype.constructor = Cat
+//
+// let pound = new Cat('pound', 2, 'white')
+// console.log(pound)
+
+//寄生组合继承
+
+// function Cat() {
+//   //继承父类属性
+//   Animal.apply(this, arguments)
+// }
+//
+// (function () {
+//   //创建空类
+//   let Super = function () {
+//   }
+//   Super.prototype = Animal.prototype
+//   //父类的实例作为子类的原型
+//   Cat.prototype = new Super()
+// })()
+// //修复构造函数指向问题
+// Cat.prototype.constructor = Cat
+// let pound = new Cat('pound', 2, 'white')
+// console.log(pound)
+
+//ES6 继承
+
+class Animal {
+  constructor(name, age, color) {
+    this.name = name
+    this.age = age
+    this.color = color
+  }
+
+  checkColor() {
+    console.log('color: ' + this.color)
+  }
+}
+
+class Cat extends Animal {
+  constructor(name, age, color) {
+    super(...arguments)
+  }
+
+  checkColor() {
+    super.checkColor()
+  }
+}
+
+let pound = new Cat('pound', 2, 'white')
+
+console.log(pound)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
