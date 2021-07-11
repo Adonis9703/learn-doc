@@ -392,42 +392,83 @@
 
 //ES6 继承
 
-class Animal {
-  constructor(name, age, color) {
-    this.name = name
-    this.age = age
-    this.color = color
-  }
-
-  checkColor() {
-    console.log('color: ' + this.color)
-  }
-}
-
-class Cat extends Animal {
-  constructor(name, age, color) {
-    super(...arguments)
-  }
-
-  checkColor() {
-    super.checkColor()
-  }
-}
-
-let pound = new Cat('pound', 2, 'white')
-
-console.log(pound)
-
-
+// class Animal {
+//   constructor(name, age, color) {
+//     this.name = name
+//     this.age = age
+//     this.color = color
+//   }
+//
+//   checkColor() {
+//     console.log('color: ' + this.color)
+//   }
+// }
+//
+// class Cat extends Animal {
+//   constructor(name, age, color) {
+//     super(...arguments)
+//   }
+//
+//   checkColor() {
+//     super.checkColor()
+//   }
+// }
+//
+// let pound = new Cat('pound', 2, 'white')
+//
+// console.log(pound)
 
 
+// function debounce(fn) {
+//   let timer = null
+//   return function () {
+//     clearTimeout(timer)
+//     timer = setTimeout(() => {
+//       fn.apply(this, arguments)
+//     }, 500)
+//   }
+// }
+//
+// function throttle(fn) {
+//   let flag = true
+//   return function () {
+//     if (!flag) return
+//     flag = false
+//     setTimeout(() => {
+//       fn.apply(this, arguments)
+//       flag = true
+//     }, 500)
+//   }
+// }
+//
 
-
-
-
-
-
-
+// function deepCopy(source, target) {
+//   target = target || {}
+//   for (const sourceKey in source) {
+//     if (typeof source[sourceKey] === 'object') {
+//       target[sourceKey] = source[sourceKey].constructor === Array ? [] : {}
+//       deepCopy(source[sourceKey], target[sourceKey])
+//     } else {
+//       target[sourceKey] = source[sourceKey]
+//     }
+//   }
+//   return target
+// }
+//
+// let source1 = {
+//   a: 1,
+//   b: 'b',
+//   c: [1, 2, 3, 4],
+//   d: {deep: true}
+// }
+// let source2 = [
+//   'a', 1, 2, {x: [5, 4, 3, 2, 1]}
+// ]
+// let target1 = {}
+//
+// deepCopy(source2, target1)
+// // target1 = JSON.parse(JSON.stringify(source2))
+// console.log(target1)
 
 
 
