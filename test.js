@@ -136,21 +136,21 @@
 
 
 // new操作符都做了什么
-// function _new(func, ...args) {
-//   let target = {}
-//   target.__proto__ = func.prototype
-//   let res = func.apply(target, args)
-//   return res instanceof Object ? res : target
-// }
-//
-// function Origin(sex, age) {
-//   this.name = 'name'
-//   this.age = age
-//   this.sex = sex
-// }
-// let origin = new Origin('F', 10)
-// console.log(origin)
-// console.log(_new(Origin, 'M', 20))
+function _new(func, ...args) {
+  let target = {}
+  target.__proto__ = func.prototype
+  let res = func.apply(target, args)
+  return res instanceof Object ? res : target
+}
+
+function Origin(sex, age) {
+  this.name = 'name'
+  this.age = age
+  this.sex = sex
+}
+let origin = new Origin('F', 10)
+console.log(origin)
+console.log(_new(Origin, 'M', 20))
 
 
 //防抖
@@ -471,27 +471,175 @@
 // console.log(target1)
 
 
+// window.name = 'ByteDance'
+// function A() {
+//   this.name = 123
+// }
+// A.prototype.getA = function () {
+//   console.log(this)
+//   console.log(this.name + 1) //ByteDance1
+//   return this.name
+// }
+// let a = new A()
+// let funcA = a.getA //丢失this
+// funcA()
 
+// window.name = 'ByteDance'
+// class A {
+//   constructor() {
+//     this.name = 123
+//   }
+//   getA() {
+//     console.log(this) //undefined 在类中强制使用严格模式 严格模式下this指向undefined
+//     console.log(this.name + 1)
+//     return this.name
+//   }
+// }
+// let a = new A()
+// let funcA = a.getA
+// funcA()
 
+// function a() {
+//   console.log('a')
+//   Promise.resolve().then(() => {
+//     console.log('e')
+//   })
+// }
+//
+// function b() {
+//   console.log('b')
+// }
+//
+// function c() {
+//   console.log('c')
+// }
+//
+// function d() {
+//   setTimeout(a, 0)
+//   var temp = Promise.resolve().then(b)
+//   setTimeout(c, 0)
+//   console.log('d')
+// }
+//
+// d() // d b a e c
 
+// let arr = [1, [1, 2], [4, [5, [6]]]]
+//
+// function flat(arr) {
+//   return arr.flat(Infinity)
+// }
+// console.log(flat(arr))
 
+// const list = [1, 2, 3]
+// const square = num => {
+//   return new Promise((resolve,reject) => {
+//     setTimeout(()=> {
+//       resolve(num * num)
+//     }, 1000)
+//   })
+// }
+// async function test() {
+//   for (let i = 0; i < list.length; i++) {
+//     let res = await square(list[i])
+//     console.log(res)
+//   }
+//   // list.forEach(async x => {
+//   //   const res = await square(x)
+//   //   console.log(res)
+//   // })
+// }
+// test()
 
+// function find(arr, target) {
+//   // let result = []
+//   // for (let i = 0; i < arr.length; i++) {
+//   //   // let flag = arr[i]
+//   //   for (let j = 1; j < arr.length; j++) {
+//   //     if (arr[i] + arr[j] === target) {
+//   //       if (!result.flat(Infinity).includes(arr[j])) {
+//   //         result.push([arr[i], arr[j]])
+//   //       }
+//   //     }
+//   //   }
+//   // }
+//   // console.log(result)
+//   let hash = {}
+//   let result = new Map()
+//   for (let i = 0; i < arr.length; i++) {
+//     let m = arr[i]
+//     let diff = target - m
+//     if (hash[m] && !result.has(diff)) {
+//       result.set(diff, [diff, m])
+//     }
+//     hash[diff] = diff
+//   }
+//   console.log([...result.values()])
+// }
+//
+// find([32, 3, 5, 1, 30, 76, 2, 10, 29], 31)
 
+//手写promise
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// class mPromise {
+//   constructor(executor) {
+//     this.status = 'pending' //默认为pending
+//     this.resolved = undefined //成功状态 默认为undefined
+//     this.rejected = undefined //失败状态 默认为undefined
+//
+//     this.onResolvedCallbacks = [] //存放成功的回调
+//     this.onRejectedCallbacks = [] //存放失败的回调
+//
+//     let resolve = resolved => { //成功的方法
+//       if (this.status === 'pending') {
+//         this.status = 'fulfilled'
+//         this.resolved = resolved
+//         this.onResolvedCallbacks.forEach(fn => fn()) //依次执行回调函数
+//       }
+//     }
+//
+//     let reject = rejected => {
+//       if (this.status === 'pending') {
+//         this.status = 'rejected'
+//         this.rejected = rejected
+//         this.onRejectedCallbacks.forEach(fn => fn())
+//       }
+//     }
+//
+//     try {
+//       executor(resolve, reject) //尝试执行，将resolve和reject函数传给使用者
+//     } catch (e) {
+//       reject(e)
+//     }
+//   }
+//
+//   //定义一个then方法，并接受两个参数，分别是成功和失败的回调。
+//   then(onFulFilled, onRejected) {
+//     if (this.status === 'fulfilled') {
+//       onFulFilled(this.resolved)
+//     }
+//     if (this.status === 'rejected') {
+//       onRejected(this.rejected)
+//     }
+//     // 如果promise的状态是 pending，需要将 onFulfilled 和 onRejected 函数存放起来，等待状态确定后，再依次将对应的函数执行
+//     if (this.status === 'pending') {
+//       this.onResolvedCallbacks.push(() => {
+//         onFulFilled(this.resolved)
+//       })
+//       this.onRejectedCallbacks.push(() => {
+//         onRejected(this.rejected)
+//       })
+//     }
+//   }
+// }
+//
+// const promise = new mPromise((resolve, reject) => {
+//   setTimeout(() => {
+//     resolve('成功')
+//   }, 1000)
+// }).then(res => {
+//   console.log('success', res)
+// }, err => {
+// })
 
 
 

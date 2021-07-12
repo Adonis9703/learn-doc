@@ -8,8 +8,6 @@ title: 面试记录
 
 CDN 可以加快用户访问网络资源的速度和稳定性，减轻源服务器的访问压力
 
-
-
 ## 计算机网络
 
 OSI参考模型
@@ -60,6 +58,53 @@ TCP是传输层协议，为了准确无误的把数据传输给目标，通过TC
 5. 标签选择器
 6. 通配符选择器
 7. 浏览器默认属性
+
+## 浏览器原理
+
+#### 浏览器是多进程的
+
+1. Browser进程：浏览器的主进程，只有一个
+- 负责浏览器界面显示，与用户交互
+- 负责各个页面的管理，创建或销毁其他进程
+- 将Renderer进程得到的内存中的Bitmap，会知道用户界面上
+- 网络资源的管理，下载等
+
+2. 第三方插件进程：每种类型的插件对应一个进程，仅当使用该插件时才会创建
+
+3. GPU进程：用于3D绘制
+
+4. 浏览器渲染进程（浏览器内核）:Renderer进程，内部是多线程的，默认每个Tab页面有一个进程，互不影响
+
+#### 浏览器内核（渲染进程）
+
+浏览器的渲染进程是多线程的
+
+1. GUI渲染线程
+- 负责渲染浏览器界面，解析HTML，CSS，构建DOM树和RenderObject树，布局和绘制等
+- 当界面需要重绘（Repaint）或由于某种操作引发回流（reflow）时，该线程就会执行
+- 注意：GUI渲染线程是和JS引擎线程互斥的，当JS引擎执行时，GUI线程会被挂起，GUI更新会被保存在一个队列中等到
+JS引擎空闲时立即被执行
+
+2. JS引擎线程
+- 也被称为JS内核，负责处理Javascript脚本（例如V8引擎）
+- JS引擎线程负责解析Javas脚本，运行代码
+- JS引擎一直等待着任务队列中任务的到来，然后加以处理，每一个Tab页（render进程）中无论什么时候都仅有一个JS线程在运行JS程序
+- 同样，JS线程和GUI线程是互斥的，所以如果JS执行时间过长，就会造成页面渲染异常，页面卡顿等问题
+
+3. 事件触发线程
+- 归属于浏览器而不是JS引擎，用来控制事件循环（可以理解为JS引擎自己都忙不过来，需要浏览器另开线程协助）
+- 当JS引擎执行代码块如setTimeout（也可以是莱子浏览器内核的其他线程，如鼠标点击，异步请求等），会将对应的任务添加到事件线程中
+- 当对应的事件符合触发条件被触发时，该线程会把事件添加到待处理队列的队尾，等待JS引擎处理
+- 由于JS单线程的关系，所以这些待处理队列中的事件都得排队等待JS引擎处理（当JS引擎空闲时才会去执行）
+
+4. 定时触发线程
+- setInterval 和 setTimeout所在的线程
+- 浏览器定时计数器并不是由JS引擎计数的，因为JS引擎是单线程的，如果处于组塞线程状态就会影响计时器的准确性
+
+5. 异步http请求线程
+- XMLHttpRequest在连接后是通过浏览器重新开一个线程请求
+- 将检测到状态变更时，如果设置有回调函数，异步线程就会产生状态变更事件，将这个事件放入事件队列中，再由JS引擎处理。
+
 
 ## 浏览器渲染步骤
 
@@ -255,6 +300,87 @@ promise.then(res => {
   console.log(res) //resolved
 }, err => {
   console.log(err) //rejected
+})
+```
+
+## 手写一个Promise
+
+首先了解Promise的基本特征：
+
+1. promise有三种状态：`pending`，`fulfilled`，和`rejected`
+2. new promise时，需要传递一个`executor()`执行器，执行器立刻执行
+3. `executror`接受两个参数，分别是`resolve`和reject
+4. promise的默认状态是`pending`
+5. promise需要一个字段保存成功状态的值resolved
+6. promise需要一个字段保存失败的状态rejected
+7. promise只能从`pending`到`rejected`，或者从`pending`到`fulfilled`，状态一旦确认，
+就不会再改变
+8. promise必须有一个`then`方法，`then`接受两个参数，分别是成功的回调`onFulfilled`和失败的回调`onRejected`
+9. 如果调用`then`时，promise已经成功，则执行`onFulfilled`，参数是promise的成功字段resolved
+10. 如果调用`then`时，promise已经失败，则执行`onRejected`，参数是promise的失败字段rejected
+11. 如果then中抛出了异常，那么就会把这个异常作为参数，传递给下一个then的失败的回调`onRejected`
+
+
+```javascript
+class mPromise {
+  constructor(executor) {
+    this.status = 'pending' //默认为pending
+    this.resolved = undefined //成功状态 默认为undefined
+    this.rejected = undefined //失败状态 默认为undefined
+   
+    this.onResolvedCallbacks = [] //存放成功的回调
+    this.onRejectedCallbacks = [] //存放失败的回调
+    
+    let resolve = resolved => { //成功的方法
+      if (this.status === 'pending') {
+        this.status = 'fulfilled'
+        this.resolved = resolved
+        this.onResolvedCallbacks.forEach(fn => fn()) //依次执行回调函数
+      } 
+    }
+    
+    let reject = rejected => {
+      if (this.status === 'pending') {
+        this.status = 'rejected'
+        this.rejected = rejected
+        this.onRejectedCallbacks.forEach(fn => fn())
+      } 
+    }
+    
+    try {
+      executor(resolve, reject) //尝试执行，将resolve和reject函数传给使用者
+    } catch (e) {
+      reject(e)
+    }
+  }
+  
+  //定义一个then方法，并接受两个参数，分别是成功和失败的回调。
+  then(onFulFilled, onRejected) {
+    if (this.status === 'fulfilled') {
+      onFulFilled(this.resolved)
+    } 
+    if (this.status === 'rejected') {
+      onRejected(this.rejected)
+    } 
+    // 如果promise的状态是 pending，需要将 onFulfilled 和 onRejected 函数存放起来，等待状态确定后，再依次将对应的函数执行
+   if (this.status === 'pending') {
+     this.onResolvedCallbacks.push(() => {
+       onFulFilled(this.resolved)
+     })
+     this.onRejectedCallbacks.push(() => {
+       onRejected(this.rejected)
+     })
+   }
+  }
+}
+
+const promise = new mPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('成功')
+  }, 1000)
+}).then(res => {
+  console.log('success', res)
+}, err => {
 })
 ```
 
@@ -807,3 +933,28 @@ console.log(_new(Origin, 'M', 20))
 都代表源码的一种结构。平时编辑器的代码高亮、代码检查都依靠的是AST。
 2. 对AST进行处理，在这个阶段可以对ES6代码进行相应转换，即转成ES5代码。
 3. 根据处理后的AST再生成代码字符串。
+
+## 如何间隔1s输出内容
+
+```javascript
+const list = [1, 2, 3]
+const square = num => {
+  return new Promise((resolve,reject) => {
+    setTimeout(()=> {
+      resolve(num * num)
+    }, 1000)
+  })
+}
+async function test() {
+  for (let i = 0; i < list.length; i++) {
+    let res = await square(list[i])
+    console.log(res)
+  }
+  // list.forEach(async x => {
+  //   const res = await square(x)
+  //   console.log(res)
+  // })
+}
+test()
+```
+如果使用`forEach`循环，会导致在一秒后同时输出
