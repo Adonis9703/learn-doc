@@ -1,5 +1,44 @@
 //https://www.kancloud.cn/freya001/interview/1224405
 
+//rest
+function add(...values) {
+  let sum = 0
+  for (const val of values) {
+    sum += val
+  }
+  return sum
+}
+
+console.log(add(1, 2, 3)) //6
+
+const curry = (...a) => (...b) => (...c) => {
+  let temp = [...a, ...b, ...c]
+  let sum = 0
+  for (const val of temp) {
+    sum += val
+  }
+  return sum
+}
+
+console.log(curry(1, 2)(3, 4)(5, 6))
+
+function sortNum() {
+  // return Array.prototype.sort.apply(arguments)
+  return Array.prototype.slice.call(arguments).sort()
+}
+const sortRest = (...nums) => nums.sort()
+
+console.log(sortNum(5,4,3,2,1))
+console.log(sortRest(4,2,5,7,3))
+
+function push(arr, ...items) {
+  items.forEach(item => {
+    arr.push(item)
+  })
+  console.log(arr)
+}
+push([], 1, 2, 3) //[1, 2, 3]
+
 // call apply bind
 // function Fruits() {}
 //
@@ -136,21 +175,22 @@
 
 
 // new操作符都做了什么
-function _new(func, ...args) {
-  let target = {}
-  target.__proto__ = func.prototype
-  let res = func.apply(target, args)
-  return res instanceof Object ? res : target
-}
-
-function Origin(sex, age) {
-  this.name = 'name'
-  this.age = age
-  this.sex = sex
-}
-let origin = new Origin('F', 10)
-console.log(origin)
-console.log(_new(Origin, 'M', 20))
+// function _new(func, ...args) {
+//   let target = {}
+//   target.__proto__ = func.prototype
+//   let res = func.apply(target, args)
+//   return res instanceof Object ? res : target
+// }
+//
+// function Origin(sex, age) {
+//   this.name = 'name'
+//   this.age = age
+//   this.sex = sex
+// }
+//
+// let origin = new Origin('F', 10)
+// console.log(origin)
+// console.log(_new(Origin, 'M', 20))
 
 
 //防抖
@@ -642,6 +682,51 @@ console.log(_new(Origin, 'M', 20))
 // })
 
 
+//手写 发布订阅模式 EventEmitter
 
-
+// class EventEmitter {
+//   constructor() {
+//     this.events = {} //事件对象，存放订阅的名字和事件 如：{click: [handle1, handle2]
+//   }
+//
+//   // 订阅事件的方法
+//   on(eventName, callback) {
+//     if (!this.events[eventName]) {
+//       //一个事件名可以订阅多个事件函数
+//       this.events[eventName] = [callback]
+//     } else {
+//       //存在则push到指定数组的尾部保存
+//       this.events[eventName].push(callback)
+//     }
+//   }
+//
+//   //触发事件的方法
+//   emit(eventName, ...args) {
+//     //遍历执行所有订阅的事件
+//     this.events[eventName] && this.events[eventName].forEach(fn => fn.apply(this, args))
+//   }
+//
+//   //移除订阅事件
+//   off(eventName, callback) {
+//     if (this.events[eventName]) {
+//       this.events[eventName] = this.events[eventName].filter(fn => fn !== callback)
+//     }
+//   }
+//
+//   //只执行一次订阅的事件，然后移除
+//   once(eventName, callback) {
+//     const fn = (...args) => {
+//       callback.apply(this, args)
+//       this.off(eventName, fn)
+//     }
+//     this.on(eventName, fn)
+//   }
+// }
+//
+// const event = new EventEmitter()
+// const handle = (...payload) => console.log(...payload)
+//
+// event.on('check', handle)
+//
+// event.emit('check', 'success')
 

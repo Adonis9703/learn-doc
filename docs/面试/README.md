@@ -4,6 +4,56 @@ title: 面试记录
 
 # 面经
 
+## 手写EventEmitter
+
+EventEmitter 本质上是一个发布订阅模式。
+
+```javascript
+class EventEmitter {
+  constructor() {
+    this.events = {} //事件对象，存放订阅的名字和事件如：{click: [handle1, handle2]}  
+  }
+  
+  //订阅事件的方法
+  on(eventName, callback) {
+    if (!this.events[eventName]) { //如果事件对象里没有则添加
+      this.events[eventName] = [callback] //一个事件名可以订阅多个事件函数，所以用数组存放
+    } else {
+      this.events[eventName].push(callback)
+    }
+  }
+  
+  //触发事件的方法
+  emit(eventName, ...args) {
+    //遍历执行所有的订阅事件
+    this.events[eventName] && this.events[eventName].forEach(fn => fn.apply(this, args))
+  }
+  
+  //移除订阅事件
+  off(eventName, callback) {
+    if (this.events[name]) {
+      this.events[eventName] = this.events[eventName].filter(fn => fn !== callback)
+    } 
+  }
+  
+  //只执行一次 然后移除
+  once(eventName, callback) {
+    const fn = (...args) => {
+      callback.apply(this, args) //在fn中调用callback
+      this.off(eventName, fn)
+    }
+    this.on(eventName, fn) 
+  }
+}
+
+const event = new EventEmitter()
+const handle = (...payload) => console.log(...payload)
+
+event.on('check', handle)
+
+event.emit('check', 'success') 
+```
+
 ## CDN 加速
 
 CDN 可以加快用户访问网络资源的速度和稳定性，减轻源服务器的访问压力
@@ -685,9 +735,13 @@ const Add = a => {
   }
 }
 
+const ADD = (a, a1 = 0) => (b, b1 = 0) => c => (a+ a1 + b + b1 + c)
+ 
+
 console.log(plus(1,2,3))  //6
 console.log(add(1)(2)(3)) //6
 console.log(Add(1)(2)(3)) //6
+console.log(ADD(1, 2)(3, 4)(5)) //15
 ```
 柯里化 封装正则
 ```javascript

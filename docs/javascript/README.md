@@ -4,6 +4,60 @@ title: JavaScript
 
 # JavaScript
 
+## REST 参数
+
+es6 引入了rest参数（形式：...变量名），用于获取函数的多余参数，这样就不需要使用arguments对象了。rest参数搭配的变量是一个数组，该变量将多余的参数放入数组中。
+
+```javascript
+function add(...values) {
+  let sum = 0
+  for (const val of values) {
+    sum += val
+  }
+  return sum
+}
+
+console.log(add(1, 2, 3)) //6
+
+const curry = (...a) => (...b) => (...c) => {
+  let temp = [...a, ...b, ...c]
+  let sum = 0
+  for (const val of temp) {
+    sum += val
+  }
+  return sum
+}
+
+console.log(curry(1, 2)(3, 4)(5, 6))
+```
+
+用rest参数替换arguments变量
+
+```javascript
+function sortNum() {
+  // return Array.prototype.sort.apply(arguments) //如果这样写，返回将会是一个类数组对象
+  return Array.prototype.slice.call(arguments).sort()
+}
+const sortRest = (...nums) => nums.sort()
+
+console.log(sortNum(5,4,3,2,1))
+console.log(sortRest(4,2,5,7,3))
+
+```
+arguments对象不是数组，而是一个类似数组的对象。所以为了使用数组的方法，必须使用Array.prototype.slice.call先将其转为数组。
+rest参数就不存在这个问题，它就是一个真正的数组，数组特有的方法都可以使用。
+下面是一个利用rest参数改写数组push方法的例子。
+
+```javascript
+function push(arr, ...items) {
+  items.forEach(item => {
+    arr.push(item)
+  })
+  console.log(arr)
+}
+push([], 1, 2, 3) //[1, 2, 3]
+```
+
 ## EventLoop
 
 先看例子
