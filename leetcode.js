@@ -319,3 +319,23 @@ let mergeTwoLists = function (l1, l2) {
   //
   // return prehead.next;
 };
+
+//lc-22
+
+const generateParenthesis = function (n) {
+  const result = []
+  const dfs = (lRemain, rRemain, str) => { //左右括号所剩的数量
+    if (str.length === 2*n) { //字符串构建完成
+      result.push(str) //加入解集
+      return //结束当前递归分支
+    }
+    if (lRemain > 0) { //只要左括号有剩余，就可以选择它，然后继续做选择
+      dfs(lRemain - 1, rRemain, str + '(')
+    }
+    if (lRemain < rRemain) { //只有右括号比左括号多，才可以选择右括号
+      dfs(lRemain, rRemain - 1, str + ')') //然后继续递归选择
+    }
+  }
+  dfs(n, n, '') //递归入口
+  return result
+}

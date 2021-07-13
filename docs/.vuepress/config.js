@@ -11,6 +11,7 @@ module.exports = {
           '/vue/',
           '/web/',
           '/面试/',
+          '/style/',
           {
             title: 'Style',
             children: [

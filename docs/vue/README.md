@@ -5,168 +5,128 @@ title: Vue 相关
 # Vue 相关
 
 ## vue-router原理
-https://zhuanlan.zhihu.com/p/27588422
+
 更新视图但不重新请求页面是前端路由原理的核心之一，目前在浏览器环境中这一功能的实现主要有两种方式：
 
 1. 利用URL中的hash('#')
 2. 利用History interface 在Html5中新增的方法
 
-在vue-router 中是通过`mode`参数控制路由的实现方式：
+#### hash
 
-```javascript
-const router = new VueRouter({
-  mode: 'hash',
-  routes: [...]
-})
-```
-创建VueRouter的实例对象时，mode以构造函数参数的形式传入。带着问题阅读源码，我们就可以从VueRouter类的定义入手。一般插件对外暴露的类都是定义在源码src根目录下的index.js文件中，打开该文件，可以看到VueRouter类的定义，摘录与mode参数有关的部分如下：
-```javascript
-export default class VueRouter {
-  
-  mode: string; // 传入的字符串参数，指示history类别
-  history: HashHistory | HTML5History | AbstractHistory; // 实际起作用的对象属性，必须是以上三个类的枚举
-  fallback: boolean; // 如浏览器不支持，'history'模式需回滚为'hash'模式
-  
-  constructor (options: RouterOptions = {}) {
-    
-    let mode = options.mode || 'hash' // 默认为'hash'模式
-    this.fallback = mode === 'history' && !supportsPushState // 通过supportsPushState判断浏览器是否支持'history'模式
-    if (this.fallback) {
-      mode = 'hash'
-    }
-    if (!inBrowser) {
-      mode = 'abstract' // 不在浏览器环境下运行需强制为'abstract'模式
-    }
-    this.mode = mode
+hash 是URL中'#'符号及其后面的部分，常用作锚点在页面内进行导航，改变URL中的hash不会引起页面刷新。
 
-    // 根据mode确定history实际的类并实例化
-    switch (mode) {
-      case 'history':
-        this.history = new HTML5History(this, options.base)
-        break
-      case 'hash':
-        this.history = new HashHistory(this, options.base, this.fallback)
-        break
-      case 'abstract':
-        this.history = new AbstractHistory(this, options.base)
-        break
-      default:
-        if (process.env.NODE_ENV !== 'production') {
-          assert(false, `invalid mode: ${mode}`)
-        }
-    }
-  }
+通过hashchange事件监听URL的变化，改变URL的方式只有这几种：
+1. 通过浏览器进退改变URL
+2. 通过`<a>`标签改变URL
+3. 通过`window.location`改变URL
 
-  init (app: any /* Vue component instance */) {
-    
-    const history = this.history
+#### history
 
-    // 根据history的类别执行相应的初始化操作和监听
-    if (history instanceof HTML5History) {
-      history.transitionTo(history.getCurrentLocation())
-    } else if (history instanceof HashHistory) {
-      const setupHashListener = () => {
-        history.setupListeners()
-      }
-      history.transitionTo(
-        history.getCurrentLocation(),
-        setupHashListener,
-        setupHashListener
-      )
-    }
+history提供了`pushState`和`replaceState`两个方法，这两个方法改变URL的path部分不会引起页面刷新
 
-    history.listen(route => {
-      this.apps.forEach((app) => {
-        app._route = route
-      })
-    })
-  }
+history提供类似hashchange事件的popstate事件，但popstate事件有些不同：
 
-  // VueRouter类暴露的以下方法实际是调用具体history对象的方法
-  push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.history.push(location, onComplete, onAbort)
-  }
+1. 通过浏览器进退改变URL时会触发popstate事件
+2. 通过pushState/replaceState或`<a>`标签改变URL不会触发popstate事件
+3. 好在我们可以拦截pushState/replaceState的调用和`<a>`标签的点击事件来检测URL变化
+4. 通过js调用history的back、go、forward方法可以触发该事件
 
-  replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    this.history.replace(location, onComplete, onAbort)
-  }
-}
-```
-可以看出：
+### 基于hash实现
 
-1. 作为参数的字符串属性mode只是一个标记，用来指示实际作用的对象属性history的实现类
-2. 在初始化对应的history之前，会对mode做一些校验：若浏览器不支持HTML5History方式（通过supportsPushState变量判断），
-则mode强制设为'hash'；若不是在浏览器环境下运行，则mode强制设为abstract
-3. VueRouter类中的onReady(), push()等方法只是一个代理，实际是调用的具体history对象的对应方法，在init()方法中初始化时，
-也是根据history对象具体的类别执行不同操作
-
-### HashHistory
-
-hash('#')符号本来的作用是加载URL中只是网页中的位置：
-> http://www.example.com/index.html#print
-
-'#'符号本身以及后面的字符称之为hash，可通过`window.location.hash`属性获取。它具有以下特点：
-
-- hash虽然出现在URL中，但不会被包括在HTTP请求中。它是用来直到浏览器动作的，对服务器端完全无用，因此改变hash不会重新加载页面
-- 可以为hash的改变添加监听事件：
-```javascript
-window.addEventListener('hashchange', handler, false)
-```
-- 每一次改变hash，都会在浏览器的访问历史中增加一个记录
-
-利用hash的以上特点，就可以实现前端路由“更新视图但是不重新请求页面”的功能了。
-
-#### HashHistory.push()
-
-HashHistory中的push()方法：
-
-```javascript
-push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-  this.transitionTo(location, route => {
-    pushHash(route.fullPath)
-    onComplete && onComplete(route)
-  }, onAbort)
-}
-
-function pushHash (path) {
-  window.location.hash = path
-}
-```
-
-transitionTo()方法是父类中定义的是用来处理路由变化中的基础逻辑的，push()方法最主要的是对window的hash进行了直接赋值：
-```javascript
-window.location.hash = route.fullPath
-```
-
-hash的改变会自动添加到浏览器的访问历史记录中
-
-那么视图的更新是怎么实现的呢，我们来看父类中History中transitionTo()方法中的一段：
-
-```javascript
-transitionTo (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-  const route = this.router.match(location, this.current)
-  this.confirmTransition(route, () => {
-    this.updateRoute(route)
-    ...
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>手写前端路由</title>
+</head>
+<body>
+<div>
+    <ul>
+        <li>
+            <a href="#/home">home</a>
+        </li>
+        <li>
+            <a href="#/about">about</a>
+        </li>
+        <div id="routeView"></div>
+    </ul>
+</div>
+</body>
+<script>
+  const routerView = document.getElementById('routeView')
+  window.addEventListener('hashchange', () => {
+    routerView.innerHTML = location.hash
   })
-}
-
-updateRoute (route: Route) {
-  
-  this.cb && this.cb(route)
-  
-}
-
-listen (cb: Function) {
-  this.cb = cb
-}
+  window.addEventListener('load', () => {
+    if (!location.hash) {
+      location.hash = '/' //如果不存在hash值，则重定向到 #/
+    } else {
+       //如果存在hash值，那就渲染对应的UI
+      routerView.innerHTML = location.hash
+    }
+  })
+</script>
+</html>
 ```
+1. 通过`<a>`标签的href属性来改变URL的hash值（通过浏览器的进退或者window.location赋值也能改变）
+2. 通过监听`hashchange`事件，一旦事件触发，就改变routerView的内容，若是在Vue中，这改变就是`<router-view/>`组件的内容
+3. 因为页面第一次加载不会触发hashchange，所以通过监听load事件来监听hash值，再将试图渲染成对应的内容
 
-可以看到，当路由变化时，调用了History中的this.cb方法，而this.cb方法时通过History.listen(cb)进行设置的。回到VueRouter类定义中，
-找到了`init()`方法中对其进行了设置：
-```javascript
+### 基于history实现
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>手写前端路由</title>
+</head>
+<body>
+<div>
+    <ul>
+        <li>
+            <a href="#/home">home</a>
+        </li>
+        <li>
+            <a href="#/about">about</a>
+        </li>
+        <div id="routeView"></div>
+    </ul>
+</div>
+</body>
+<script>
+  const routerView = document.getElementById('routeView')
+
+  function onLoad() {
+    routerView.innerHTML = location.pathname
+    let linkList = document.querySelectorAll('a[href]')
+    linkList.forEach(el => el.addEventListener('click', e => {
+      e.preventDefault() //取消事件的默认动作 触发了点击但是不执行默认的点击事件
+      history.pushState(null, '', el.getAttribute('href'))
+      routerView.innerHTML = location.pathname
+    }))
+  }
+
+  window.addEventListener('load', onLoad)
+  window.addEventListener("popstate", () => {
+    routerView.innerHTML = location.pathname
+  })
+</script>
+</html>
 ```
+1. 同样的，可以通过`<a>`标签的属性来改变URL的path值（或者浏览器的进退，`history.go`、`history.back`、`history.forward`来触发popState事件）。
+这里需要注意到是，当改变path值时，默认会触发页面的跳转，所以需要拦截标签点击事件的默认行为，点击时使用pushState修改URL并手动更新UI从而实现点击链接
+更新URL和UI的效果
+
+2. 通过监听popState事件，来改变routerView内容
+
+3. load事件同上
+
+问题：hash模式，也可以用history.go,back,forward来触发hashchange事件吗？
+
+A：也是可以的。因为不管什么模式，浏览器为保存记录都会有一个栈。
+[参考](https://juejin.cn/post/6854573222231605256#heading-7)
 
 ## 双向绑定原理
 
