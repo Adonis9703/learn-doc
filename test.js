@@ -1,43 +1,45 @@
 //https://www.kancloud.cn/freya001/interview/1224405
 
 //rest
-function add(...values) {
-  let sum = 0
-  for (const val of values) {
-    sum += val
-  }
-  return sum
-}
-
-console.log(add(1, 2, 3)) //6
-
-const curry = (...a) => (...b) => (...c) => {
-  let temp = [...a, ...b, ...c]
-  let sum = 0
-  for (const val of temp) {
-    sum += val
-  }
-  return sum
-}
-
-console.log(curry(1, 2)(3, 4)(5, 6))
-
-function sortNum() {
-  // return Array.prototype.sort.apply(arguments)
-  return Array.prototype.slice.call(arguments).sort()
-}
-const sortRest = (...nums) => nums.sort()
-
-console.log(sortNum(5,4,3,2,1))
-console.log(sortRest(4,2,5,7,3))
-
-function push(arr, ...items) {
-  items.forEach(item => {
-    arr.push(item)
-  })
-  console.log(arr)
-}
-push([], 1, 2, 3) //[1, 2, 3]
+// function add(...values) {
+//   let sum = 0
+//   for (const val of values) {
+//     sum += val
+//   }
+//   return sum
+// }
+//
+// console.log(add(1, 2, 3)) //6
+//
+// const curry = (...a) => (...b) => (...c) => {
+//   let temp = [...a, ...b, ...c]
+//   let sum = 0
+//   for (const val of temp) {
+//     sum += val
+//   }
+//   return sum
+// }
+//
+// console.log(curry(1, 2)(3, 4)(5, 6))
+//
+// function sortNum() {
+//   // return Array.prototype.sort.apply(arguments)
+//   return Array.prototype.slice.call(arguments).sort()
+// }
+//
+// const sortRest = (...nums) => nums.sort()
+//
+// console.log(sortNum(5, 4, 3, 2, 1))
+// console.log(sortRest(4, 2, 5, 7, 3))
+//
+// function push(arr, ...items) {
+//   items.forEach(item => {
+//     arr.push(item)
+//   })
+//   console.log(arr)
+// }
+//
+// push([], 1, 2, 3) //[1, 2, 3]
 
 // call apply bind
 // function Fruits() {}
@@ -730,3 +732,36 @@ push([], 1, 2, 3) //[1, 2, 3]
 //
 // event.emit('check', 'success')
 
+//闭包循环自运行函数定时器
+// for (var i = 0; i < 5; i++) {
+//   (function (time) {
+//     setTimeout(() => {
+//       console.log(time)
+//     }, time * 1000)
+//   })(i)
+// } //间隔1s打印 1，2，3，4
+
+let obj = { a: 1 }
+let proxyObj = new Proxy(obj, {
+  //读取
+  get (target, prop) {
+    // return prop in target ? target[prop] : 0 //注释1
+    return Reflect.get(target, prop)
+  },
+  //修改或新增
+  set (target, prop, newVal) {
+    // target[prop] = newVal
+    return Reflect.set(target, prop, newVal)//需要return 一个Boolean 设置成功为true 设置失败为false
+  },
+  //删除
+  deleteProperty(target, prop) {
+    // return delete target[prop]
+    return Reflect.deleteProperty(target, prop)
+  }
+})
+
+console.log(proxyObj.a) //1
+// console.log(proxyObj.b) //0
+
+proxyObj.a = 666
+console.log(proxyObj.a) //666

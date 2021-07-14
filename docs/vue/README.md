@@ -459,22 +459,30 @@ https://www.jianshu.com/p/1fbffbd0a80c
 这将会消除在Vue2.x中基于`Object.defineProperty`的实现存在很多的限制：无法监听**属性的添加和删除、数组索引和长度的变更**，并可以支持
 `Map`、`Set`、`WeakMap`和`WeakSet`
 
-#### Proxy?
+#### Proxy
 
 > `Proxy`对象用于定义基本操作的自定义行为（如属性查找、赋值、枚举、函数调用等）。
 
 通过代理的方式，不操作对象本身，反而通过操作**代理对象**来间接操作对象。
 
 ```javascript
-let obj = { a: 1}
+let obj = { a: 1 }
 let proxyObj = new Proxy(obj, {
-  get: function(target, prop) {
-    return prop in target ? target[prop] : 0 //注释1
-  },
-  set: function(target, prop, newVal) {
-    target[prop] = newVal
-    return true //需要return 一个Boolean 设置成功为true 设置失败为false
-  }
+   //读取
+   get (target, prop) {
+     // return prop in target ? target[prop] : 0 //注释1
+     return Reflect.get(target, prop)
+   },
+   //修改或新增
+   set (target, prop, newVal) {
+     // target[prop] = newVal
+     return Reflect.set(target, prop, newVal)//需要return 一个Boolean 设置成功为true 设置失败为false
+   },
+   //删除
+   deleteProperty(target, prop) {
+     // return delete target[prop]
+     return Reflect.deleteProperty(target, prop)
+   }
 })
 
 console.log(proxyObj.a) //1
