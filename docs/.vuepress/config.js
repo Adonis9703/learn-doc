@@ -7,11 +7,13 @@ module.exports = {
       {
         title: '笔记',
         children: [
+          '/面试/',
           '/javascript/',
           '/vue/',
           '/web/',
-          '/面试/',
           '/style/',
+          '/build/',
+          '/Node/',
           {
             title: 'Style',
             children: [

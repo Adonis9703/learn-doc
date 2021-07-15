@@ -4,12 +4,213 @@ title: Vue 相关
 
 # Vue 相关
 
+## 虚拟DOM
+
+虚拟DOM就是用JS去按照DOM结构来实现树形结构的对象，也可以叫做DOM对象。
+
+#### 创建虚拟DOM
+
+```javascript
+/**
+ * @description 虚拟DOM元素的类，构建实例对象，用来描述DOM
+ */
+class Element {
+  constructor(type, props, children) {
+    this.type = type
+    this.props = props
+    this.children = children
+  }
+}
+/**
+ * 创建虚拟DOM， 返回虚拟节点
+ * @param type 指定元素的标签类型，如li,div,a等
+ * @param props 表示指定元素身上的属性，如class,style,自定义属性等
+ * @param children 表示指定元素是否由子节点，参数以数组形式传入
+ * @returns {Element}
+ */
+function createElement(type, props, children) {
+  return new Element(type, props, children)
+}
+```
+类和方法都定义好了，创建一个虚拟DOM试试。
+```javascript
+let virtualDom = createElement('ul', {class: 'list'}, [
+  createElement('li', {class: 'item'}, ['狗狗']),
+  createElement('li', {class: 'item'}, ['猫猫']),
+  createElement('li', {class: 'item'}, ['猪猪']),
+])
+console.log(virtualDom)
+```
+输出如下
+
+![avater](/vdom-2.png)
+
+创建虚拟DOM后，就要进行下一步，将其渲染成真实的DOM
+
+#### 渲染虚拟DOM
+
+先定义几个关键的方法
+
+```javascript
+/**
+ * render方法将虚拟DOM转化为真实DOM
+ * @param domObj
+ * @returns {any}
+ */
+function render(domObj) {
+  //根据type类型来创建对应的元素
+  let el = document.createElement(domObj.type)
+
+  //遍历props属性对象，然后给创建的元素el设置属性
+  for (const propsKey in domObj.props) {
+    setAttr(el, propsKey, domObj.props[propsKey])
+  }
+
+  //遍历子节点
+  //如果是虚拟DOM，就递归渲染
+  //如果不是，就直接创建
+  domObj.children.forEach(child => {
+    child = (child instanceof Element) ? render(child) : document.createTextNode(child)
+    //添加到对应元素内
+    el.appendChild(child)
+  })
+  return el
+}
+
+/**
+ * 设置节点属性
+ * @param node
+ * @param key
+ * @param value
+ */
+function setAttr(node, key, value) {
+  switch (key) {
+    case 'value':
+      //node是一个input或者textarea就直接设置其value即可
+      if (node.tagName.toLowerCase() === 'input' 
+        || node.tagName.toLowerCase() === 'textarea') {
+        node.value = value
+      } else {
+        node.setAttribute(key, value)
+      }
+      break
+    case 'style':
+      //直接赋值行内样式
+      node.style.cssText = value
+      break
+    default:
+      node.setAttribute(key, value)
+      break
+  }
+}
+
+//将元素插入到页面内
+function renderDom(el, target) {
+  target.appendChild(el)
+}
+```
+在这里我们需要一个节点作为测试，并把代码整合到一起
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>手写虚拟DOM</title>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+<script>
+    class Element {
+      constructor(type, props, children) {
+        this.type = type
+        this.props = props
+        this.children = children
+      }
+    }
+    
+    function createElement(type, props, children) {
+      return new Element(type, props, children)
+    }
+    
+    function render(domObj) {
+      let el = document.createElement(domObj.type)
+      for (const propsKey in domObj.props) {
+        setAttr(el, propsKey, domObj.props[propsKey])
+      }
+      domObj.children.forEach(child => {
+        child = (child instanceof Element) ? render(child) : document.createTextNode(child)
+        el.appendChild(child)
+      })
+      return el
+    }
+    
+    function setAttr(node, key, value) {
+      switch (key) {
+        case 'value':
+          if (node.tagName.toLowerCase() === 'input' 
+               || node.tagName.toLowerCase() === 'textarea') {
+            node.value = value
+          } else {
+            node.setAttribute(key, value)
+          }
+          break
+        case 'style':
+          node.style.cssText = value
+          break
+        default:
+          node.setAttribute(key, value)
+          break
+      }
+    }
+    
+    function renderDom(el, target) {
+      target.appendChild(el)
+    }
+    
+    let virtualDom = createElement('ul', {class: 'list'}, [
+      createElement('li', {class: 'item'}, ['狗狗']),
+      createElement('li', {class: 'item'}, ['猫猫']),
+      createElement('li', {class: 'item'}, ['猪猪']),
+    ])
+    
+    let el = render(virtualDom) //渲染虚拟DOM得到真实的DOM结构
+    
+    renderDom(el, document.getElementById('root'))
+
+</script>
+</html>
+```
+页面渲染后的结果如下
+
+![avater](/vdom-1.png)
+
+
+
+## diff算法
+
+## key的作用
+
+虚拟DOM中key的作用：
+
+1. key是虚拟DOM对象的标识，当数据发生变化时，Vue会根据【新数据】生成新的【虚拟DOM】
+2. 随后Vue进行对新旧虚拟DOM进行差异比较（diff算法），比较规则如下：
+    - 在旧虚拟DOM找到了与新虚拟DOM相同的key
+        - 若虚拟DOM中的内容没变，则直接复用之前的真实DOM
+        - 若虚拟DOM中的内容变了，则生成新的真实DOM，随后替换掉页面中之前的真实DOM
+    - 旧虚拟DOM中未找到与新虚拟DOM相同的key
+        - 创建新的真实DOM，随后渲染到页面
+3. 用index作为key可能会引发的问题：
+    - 若对数据进行：逆序添加、逆序删除等破坏顺序的操作，会产生额米有必要的真实DOM更新
+    - 有可能会引发错误DOM更新    
+4. 开发时可以使用数据的唯一标识作为key
+
 ## vue-router原理
 
 更新视图但不重新请求页面是前端路由原理的核心之一，目前在浏览器环境中这一功能的实现主要有两种方式：
 
 1. 利用URL中的hash('#')
-2. 利用History interface 在Html5中新增的方法
+2. 利用History interface 在Html5中新增的方法:
 
 #### hash
 
@@ -632,10 +833,10 @@ Vue 在内部对异步队列尝试使用原生的 Promise.then、MutationObserve
 `nextTick`是Vue中的更新策略，也是性能优化手段。
 
 #### 应用场景
+
 1. 在`created()`钩子函数中进行dom操作时一定要在`nextTick()`的回调函数中。
 
 2. 在数据变化后要执行的某个操作，而这个操作需要使用随数据改变而改变的dom结构的时候，这个操作都应该放进`nextTick()`的回调函数中。
-
 
 ## eventHub
 
