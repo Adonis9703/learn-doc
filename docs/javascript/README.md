@@ -58,6 +58,8 @@ function push(arr, ...items) {
 push([], 1, 2, 3) //[1, 2, 3]
 ```
 
+**rest参数只能放在最后**
+
 ## EventLoop
 
 先看例子

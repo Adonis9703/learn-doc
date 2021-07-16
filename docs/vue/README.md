@@ -185,9 +185,248 @@ function renderDom(el, target) {
 
 ![avater](/vdom-1.png)
 
+## diff & patch
 
+### diff
 
-## diff算法
+diff算法的意义：给定任意两棵树，采用**先序深度优先遍历**的算法找到最少的转换步骤。
+
+Dom-diff比较两个虚拟DOM的区别，就是比较两个对象之间的区别。
+
+```javascript
+function diff(oldTree, newTree) {
+  //声明变量patches用来存放补丁的对象
+  let patches = {}
+  //第一次比较应该是树的第0个索引
+  let index = 0
+  //递归树 比较过的结果放到补丁里
+  walk(oldTree, newTree, index, patches)
+  return patches
+}
+
+function walk(oldNode, newNode, index, patches) {
+  //每一个元素都有一个补丁
+  let current = []
+  if (!newNode) { //新的DOM节点不存在
+    current.push({type: 'REMOVE', index})
+  } else if (isString(oldNode) && isString(newNode)) {
+    //判断文本是否一致
+    if (oldNode !== newNode) {
+      current.push({type: 'TEXT', text: newNode})
+    }
+  } else if (oldNode.type === newNode.type) {
+    //比较属性是否有更改
+    let attr = diffAttr(oldNode.props, newNode.props)
+    if (Object.keys(attr).length > 0) {
+      current.push({type: 'ATTR', attr})
+    }
+    //如果有子节点，遍历子节点
+    diffChildren(oldNode.children, newNode.children, patches)
+  } else { //说明节点背替换了
+    current.push({type: 'REPLACE', newNode})
+  }
+  
+  //当前元素确实有补丁存在
+  if (current.length) {
+    //将元素和补丁对应起来，放到大补丁包中
+    patches[index] = current
+  }
+}
+
+function isString(obj) {
+  return typeof obj === 'string'
+}
+
+function diffAttr(oldAttrs, newAttrs) {
+  let patch = {}
+  //判断新老属性的关系
+  for (let key in oldAttrs) {
+    if (oldAttrs[key] !== newAttrs[key]) {
+      patch[key] = newAttrs[key] //有可能还是undefined
+    }
+  }
+  for (let key in newAttrs) {
+    if (!oldAttrs.hasOwnProperty(key)) {
+      patch[key] = newAttrs[key]
+    }
+  }
+  return patch
+}
+
+//所有都基于一个序号来实现
+let num = 0
+
+function diffChildren(oldChildren, newChildren, patches) {
+  // 比较老的第一个和新的第一个
+  oldChildren.forEach((child, index) => {
+    walk(child, newChildren[index], ++num, patches)
+  })
+}
+```
+
+以上是一个简单的diff算法实现，让我们仔细看看有哪些规则
+
+#### 比较规则
+
+- 新的DOM节点不存在 `{type: 'REMOVE', index}`
+- 文本变化 `{type: 'TEXT', text: 1}`
+- 当节点类型相同时，去看一下属性是否相同，产生一个属性的补丁包 `{type: 'ATTR', attr: {class: 'list-group'}}`
+- 节点类型不相同，直接采用替换模式 `{type: 'REPLACE', newNode}`
+
+根据规则，来看看`walk`方法都做了什么
+
+1. 每个元素都有一个补丁，所以需要创建一个存放当前补丁的数组
+2. 如果没有新节点的话，就直接将REMOVE类型的补丁放入数组
+```javascript
+ if(!newNode) {
+    current.push({type: 'REMOVE', index})
+ }
+```
+3. 如果新老节点是文本的话，判断一下文本是否一致，再指定类型TEXT并把新节点放到当前补丁中
+
+```javascript
+ else if (isString(oldNode) && isString(newNode)) {
+  if(oldNode !== newNode) {
+    current.push({type: 'TEXT', text: newNode})
+  }
+ }
+```
+4. 如果新老节点的类型相同，那么就来比较他们的属性props
+    - 属性比较
+        - `diffAttr`
+            - 比较新老Attr是否相同
+            - 把newAttr的键值对赋给patch对象并返回此对象
+    - 如果有子节点的话就再比较一下子节点的不同，再调一次walk（递归）
+        - `diffChildren`
+            - 遍历oldChildren，然后递归调用walk再通过child和`newChildren[index]`去diff        
+            
+```javascript
+else if(oldNode.type === newNode.type) {
+  //比较属性是否有更改
+      let attr = diffAttr(oldNode.props, newNode.props)
+      if (Object.keys(attr).length > 0) {
+        current.push({type: 'ATTR', attr})
+      }
+      //如果有子节点，遍历子节点
+      diffChildren(oldNode.children, newNode.children, patches)
+}
+
+let num = 0
+
+function diffChildren(oldChildren, newChildren, patches) {
+  // 比较老的第一个和新的第一个
+  oldChildren.forEach((child, index) => {
+    walk(child, newChildren[index], ++num, patches)
+  })
+}
+```
+5. 如果上述条件都没有发生，就代表节点单纯的被替换了，type为REPLACE，直接使用newNode替换即可
+```javascript
+else {
+  current.push({type: 'REPLACE', newNode })
+}
+```
+6. 如果当前补丁里有值，就将对应的补丁放进大补丁包中
+```javascript
+if (current.length > 0) {
+  patches[index] = current
+} 
+```
+
+diff之后，就需要打补丁了
+
+### patch 补丁更新
+
+打补丁需要传入两个参数，一个是要打补丁的元素，另一个是要打的补丁
+
+```javascript
+let allPatches
+let index = 0 //默认哪个需要打补丁
+
+function patch(node, patches) {
+  allPatches = patches
+  patchWalk(node)
+}
+
+function patchWalk(node) {
+  let current = allPatches[index++]
+  let childNodes = node.childNodes
+  
+  //先序深度，继续遍历递归子节点
+  childNodes.forEach(child => patchWalk(child))
+  
+  if (current) {
+    doPatch(node, current) //打补丁
+  }
+}
+
+function doPatch(node, patches) {
+  //遍历所有打过的补丁
+  patches.forEach(patch => {
+    switch (patch.type) {
+      case 'ATTR':
+        for (const key in patch.attr) {
+          let val = patch.attr[key]
+          if (val) {
+            setAttr(node, key, val)
+          } else {
+            node.removeAttribute(key)
+          }
+        }
+        break;
+      case 'TEXT':
+        node.textContent = patch.text
+        break
+      case 'REPLACE':
+        let newNode = patch.newNode
+        newNode = (newNode instanceof Element) ? render(newNode) : document.createTextNode(newNode)
+        node.parentNode.replaceChild(newNode, node)
+        break
+      case 'REMOVE':
+        node.parentNode.removeChild(node)
+        break
+      default:
+        break
+    }
+  })
+}
+```
+#### patch做了什么
+
+- 用一个变量来得到传递过来的所有补丁allPatches
+- `patch`方法接受两个参数node和patches
+    - 在方法内部调用`patchWalk`反复来给某个节点打补丁
+- `patchWalk`方法里获取所有的子节点
+    - 给子节点也进行先序深度优先遍历，递归`patchWalk`
+    - 如果当前的补丁是存在的，那么就对其打补丁（`doPatch`）
+- `doPatch`打补丁方法会根据传递的patches进行遍历
+    - 判断补丁的类型来进行不同的操作
+       1. 属性ATTR：通过玄幻去遍历attrs对象，如果当前key值存在，就直接设置属性setAttr；
+       如果不存在对应的key值那就直接删除这个key键的属性
+       2. 文字TEXT：直接将补丁的text赋值给node节点的`textContent`即可
+       3. 替换REPLACE： 新节点替换老节点，首先需要判断新节点是不是Element的实例，
+       是的话就调用`render`方法渲染新节点；不是的话就表明新节点是文本节点，直接创建一个文本节点就可以了。
+       之后再调用父级`parentNode`的`replaceChild`方法替换为新的节点
+       4. 删除REMOVE：直接调用父级的removeChild方法删除改节点
+       5. todo 新增  
+       
+### 回归
+
+创建一个新的节点并测试diff和patch是否生效
+
+```javascript
+let virtualDom2 = createElement('ul', {class: 'list'}, [
+  createElement('li', {class: 'item active'},  ['狗狗']),
+  createElement('li', {class: 'item'}, ['英镑']),
+  createElement('li', {class: 'item'}, [createElement('h1', {class: 'item'}, ['新猪猪'])]),
+])
+
+let patches = diff(virtualDom, virtualDom2)
+
+console.log('patch',patches)
+
+patch(el, patches)
+```
 
 ## key的作用
 
