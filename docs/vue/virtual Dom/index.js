@@ -232,6 +232,7 @@ let virtualDom2 = createElement('ul', {class: 'list'}, [
   createElement('li', {class: 'item active'},  ['狗狗']),
   createElement('li', {class: 'item'}, ['英镑']),
   createElement('li', {class: 'item'}, [createElement('h1', {class: 'item'}, ['新猪猪'])]),
+  // createElement('li', {class: 'item'}, ['猪猪']),
 ])
 
 let patches = diff(virtualDom, virtualDom2)

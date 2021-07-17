@@ -741,27 +741,39 @@
 //   })(i)
 // } //间隔1s打印 1，2，3，4
 
-let obj = { a: 1 }
-let proxyObj = new Proxy(obj, {
-  //读取
-  get (target, prop) {
-    // return prop in target ? target[prop] : 0 //注释1
-    return Reflect.get(target, prop)
-  },
-  //修改或新增
-  set (target, prop, newVal) {
-    // target[prop] = newVal
-    return Reflect.set(target, prop, newVal)//需要return 一个Boolean 设置成功为true 设置失败为false
-  },
-  //删除
-  deleteProperty(target, prop) {
-    // return delete target[prop]
-    return Reflect.deleteProperty(target, prop)
+// let obj = { a: 1 }
+// let proxyObj = new Proxy(obj, {
+//   //读取
+//   get (target, prop) {
+//     // return prop in target ? target[prop] : 0 //注释1
+//     return Reflect.get(target, prop)
+//   },
+//   //修改或新增
+//   set (target, prop, newVal) {
+//     // target[prop] = newVal
+//     return Reflect.set(target, prop, newVal)//需要return 一个Boolean 设置成功为true 设置失败为false
+//   },
+//   //删除
+//   deleteProperty(target, prop) {
+//     // return delete target[prop]
+//     return Reflect.deleteProperty(target, prop)
+//   }
+// })
+//
+// console.log(proxyObj.a) //1
+// // console.log(proxyObj.b) //0
+//
+// proxyObj.a = 666
+// console.log(proxyObj.a) //666
+const fib = function(n) {
+  if (n == 0) {
+    return 0
   }
-})
-
-console.log(proxyObj.a) //1
-// console.log(proxyObj.b) //0
-
-proxyObj.a = 666
-console.log(proxyObj.a) //666
+  let a1 = 0
+  let a2 = 1
+  for (let i = 1; i < n; i++) {
+    [a1, a2] = [a2, a1 + a2]
+  }
+  return a2
+}
+console.log(fib(6))

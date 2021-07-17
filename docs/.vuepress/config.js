@@ -7,6 +7,7 @@ module.exports = {
       {
         title: '笔记',
         children: [
+          '/算法/',
           '/面试/',
           '/javascript/',
           '/vue/',

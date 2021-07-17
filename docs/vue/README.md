@@ -428,6 +428,10 @@ console.log('patch',patches)
 patch(el, patches)
 ```
 
+结果如下
+
+![avater](/vdom-3.png)
+
 ## key的作用
 
 虚拟DOM中key的作用：
