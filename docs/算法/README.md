@@ -268,7 +268,7 @@ const fib = function(n) {
 }
 ```
 
-es6 解构写法
+es6 解构写法 + 空间优化
 ```javascript
 const fib = function(n) {
   if (n == 0) {
@@ -282,6 +282,266 @@ const fib = function(n) {
  return a2
 }
 ```
+## 分治算法 Divide and Conquer
+
+> 分而治之，先解决子问题，再将子问题的解合并求出原问题
+
+分治算法思想很大程度上是基于递归的，也比较适合用递归来实现。分而治之，一般分为以下三个过程：
+1. 分解
+2. 解决
+3. 合并
+
+比较经典的应用就是`归并排序（Merge Sort）`和`快速排序（Quick Sort）`等。我们来从归并排序理解分治思想，
+归并排序就是将待排序数组不断*二分*为规模更小的子问题处理，再将处理好的子问题合并起来。
+
+```javascript
+const mergeSort = function (arr) {
+  const len = arr.length
+  if (len > 1) {
+    //对半分解 分
+    const middle = Math.floor(len / 2)
+    const left = arr.slice(0, middle)
+    const right = arr.slice(middle, len)
+    //分别对左右进行排序
+    mergeSort(left)
+    mergeSort(right)
+
+    //治
+    let i = 0
+    let j = 0
+    let k = 0
+    //逐一比较
+    while (i < left.length && j < right.length) {
+      if (left[i] < right[j]) {
+        arr[k] = left[i]
+        i++
+      } else {
+        arr[k] = right[j]
+        j++
+      }
+      k++
+    }
+    //处理剩余项 由于剩余项本身就已经被上一个递归排序好了 所以直接顺序赋值即可
+    while (i < left.length) {
+      arr[k] = left[i]
+      i++
+      k++
+    }
+    while (j < right.length) {
+      arr[k] = right[j]
+      j++
+      k++
+    }
+  }
+  return arr
+}
+
+
+console.log(mergeSort([8, 4, 5, 7, 1, 3, 6, 2]))
+// 分
+// [8,4,5,7]  [1,3,6,2]
+// [8,4][5,7]   [1,3][6,2]
+// 8 4   5 7   1 3   6 2
+
+// 治
+// [4,8] [5,7]   [1,3] [2,6]
+// [4,5,7,8] [1,2,3,6]
+// [1,2,3,4,5,6,7,8]
+```
+
+时间复杂度：O(nlogn)
+空间复杂度：O(n)
+
+## 动态规划 Dynamic Programming
+
+[例题](https://leetcode-cn.com/problems/climbing-stairs/)
+
+假设你正在爬楼梯，需要*n*阶你才能到达楼顶。（*n*是正整数）
+
+每次可以爬1或2个台阶，你有多少中不同的方法可以爬到楼顶呢？
+
+使用动态规划思想解题，首先要明确动态规划的三要素。
+
+### 动态规划三要素
+
+1. 重叠子问题
+2. 最优子结构
+3. 状态转移方程
+
+#### 重叠子问题
+
+> 切换机器思维，自底向上思考
+
+爬第n阶楼梯的方法数量，等于两部分之和：
+
+- 爬上 n-1 阶楼梯的方法数量
+- 爬上 n-2 阶楼梯的方法数量
+
+#### 最优子结构
+
+> 子问题的最优解能够退出原问题的优解
+
+#### 状态转移方程
+
+`dp[n] = dp[n-1] + dp[n-2]` 
+
+#### 解题
+
+确定三要素后，确认边界条件，初始化状态：
+
+- `dp[1] = 1` 只有 1 个台阶时，只有 1 种解法
+- `dp[2] = 2` 有 2 个台阶时，可以分两次1步 或 一次2步 2种解法
+
+```javascript
+const climbStairs = function(n) {
+  if (n === 1 || n === 2) {
+    return n
+  }
+  const dp = []
+  dp[1] = 1
+  dp[2] = 2
+  for (let i = 3; i <= n; i++) {
+    dp[i] = dp[i-2] + dp[i-1]
+  }
+  return dp[n]
+}
+```
+
+- 时间复杂度：O(n)
+- 空间复杂度: O(n)
+
+#### 优化
+
+在次基础上，我们还可以通过压缩空间来对算法进行优化。
+
+因为`dp[i]`只与`dp[i-1]`和`dp[i-2]`有关，没必要存储所有出现过的dp项，因此只用
+两个临时变量去存储这两个状态即可。
+
+```javascript
+const climbStairs = function(n) {
+  const climbStairs = function (n) {
+    let a1 = 1
+    let a2 = 2
+    for (let i = 3; i <= n; i++) {
+      [a1, a2] = [a2, a1 + a2]
+    }
+    return a2
+  }
+}
+```
+- 时间复杂度：O(n)
+- 空间复杂度：O(1)
+
+## 贪心算法 Greedy
+
+贪心算法时动态规划算法的一个子集，可以更高效地解决一部分更特殊的问题。实际上，用贪心算法解决问题的思路，
+并不总能给出最优解，因为它在每一步的决策中，选择目前最优策略，不考虑全局是不是最优。
+
+[例题](https://leetcode-cn.com/problems/assign-cookies/description/)
+
+假设你是一位很棒的家长，想要给你的孩子们一些小饼干。但是，每个孩子最多只能给一块饼干。
+
+对每个孩子 i，都有一个胃口值 `g[i]`，这是能让孩子们满足胃口的饼干的最小尺寸；并且每块饼干 j，都有一个尺寸 `s[j]` 。
+如果 `s[j] >= g[i]`，我们可以将这个饼干 j 分配给孩子 i ，这个孩子会得到满足。你的目标是尽可能满足越多数量的孩子，并输出这个最大数值。
+
+```javascript
+//输入 g = [1,2,3]   s = [1,2]
+//输出 1 
+//输入 g = [1,2]   s = [1,2,3]
+//输出 2 
+```
+
+#### 思路
+
+贪心算法 + 双指针求解
+
+- 给一个孩子的饼干应当经量小且能够满足孩子，更大的饼干留给胃口更大的孩子
+- 因为胃口小的孩子最容易满足，所以优先满足胃口小的孩子
+- 按照从小到大的顺序使用饼干尝试是否可以满足某个孩子
+- 当饼干j >= 胃口i时，饼干满足胃口，更新满足的孩子数并移动指针`i++`，`j++`，`res++`
+- 当饼干j < 胃口i时，饼干不能满足胃口，需要换大的`j++`
+
+#### 关键点
+
+将需求因子g和s分别从小到大排序，使用贪心思想配合双指针，每个饼干只尝试一次，成功则换下一个孩子来尝试。
+```javascript
+const findContentChildren = function (g, s) {
+  g.sort((a, b) => a - b)
+  s.sort((a, b) => a - b)
+  let gi = 0 //胃口值index
+  let sj = 0 //饼干尺寸index
+  let res = 0 //满足的孩子数量
+  while (gi < g.length && sj < s.length) {
+    if (s[sj] >= g[gi]) {
+      gi++
+      sj++
+      res++
+    } else {
+      sj++
+    }
+  }
+  return res
+}
+```
+- 时间复杂度：O(nlogn)
+- 空间复杂度：O(1)
+
+## 回宿算法 Backtracking
+
+> 回溯算法本质上就是枚举，使用摸着石头过河的查找策略，还可以通过剪枝少走冤枉路
+
+[例题](https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/)
+
+#### 思路
+
+使用*回溯法*进行求解，回溯是一种通过*穷举*所有可能的情况来找到所有解的算法。
+如果一个候选解最后被发现并不是可行解，回溯算法会舍弃它，并在前面的一些步骤做出一些修改，并重新尝试找到可行解。究其本质，其实就是枚举。
+
+如果没有更多的数字需要被输入，说明当前的组合已经产生。
+
+如果还有数字需要被输入：
+- 遍历下一个数字所对应的所有映射的字母
+- 将当前的字母添加到组合最后，也就是str+ tmp[r]
+
+#### 关键点
+
+在for循环中调用递归
+
+```javascript
+const letterCombinations = function (digits) {
+  if (!digits) {
+    return []
+  }
+  const len = digits.length
+  const map = new Map()
+  map.set('2', 'abc')
+    .set('3', 'def')
+    .set('4', 'ghi')
+    .set('5', 'jkl')
+    .set('6', 'mno')
+    .set('7', 'pqrs')
+    .set('8', 'tuv')
+    .set('9', 'wxyz')
+  const result = []
+
+  // console.log(map)
+  function generate(i, str) {
+    if (i == len) {
+      result.push(str)
+      return
+    }
+    const tmp = map.get(digits[i])
+    for (let r = 0; r < tmp.length; r++) {
+      generate(i + 1, str + tmp[r])
+    }
+  }
+
+  generate(0, '')
+  return result
+}
+```
+
+
 
 
 

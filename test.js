@@ -765,15 +765,133 @@
 //
 // proxyObj.a = 666
 // console.log(proxyObj.a) //666
-const fib = function(n) {
-  if (n == 0) {
-    return 0
-  }
-  let a1 = 0
-  let a2 = 1
-  for (let i = 1; i < n; i++) {
-    [a1, a2] = [a2, a1 + a2]
-  }
-  return a2
-}
-console.log(fib(6))
+// const fib = function(n) {
+//   if (n == 0) {
+//     return 0
+//   }
+//   let a1 = 0
+//   let a2 = 1
+//   for (let i = 1; i < n; i++) {
+//     [a1, a2] = [a2, a1 + a2]
+//   }
+//   return a2
+// }
+// console.log(fib(6))
+
+//分治算法 归并排序
+// const mergeSort = function (arr) {
+//   const len = arr.length
+//   if (len > 1) {
+//     //对半分解 分
+//     const middle = Math.floor(len / 2)
+//     const left = arr.slice(0, middle)
+//     const right = arr.slice(middle, len)
+//     //分别对左右进行排序
+//     mergeSort(left)
+//     mergeSort(right)
+//
+//     //治
+//     let i = 0
+//     let j = 0
+//     let k = 0
+//     //逐一比较
+//     while (i < left.length && j < right.length) {
+//       if (left[i] < right[j]) {
+//         arr[k] = left[i]
+//         i++
+//       } else {
+//         arr[k] = right[j]
+//         j++
+//       }
+//       k++
+//     }
+//     //处理剩余项 由于剩余项本身就已经被上一个递归排序好了 所以直接顺序赋值即可
+//     while (i < left.length) {
+//       arr[k] = left[i]
+//       i++
+//       k++
+//     }
+//     while (j < right.length) {
+//       arr[k] = right[j]
+//       j++
+//       k++
+//     }
+//   }
+//   return arr
+// }
+//
+// console.log(mergeSort([8, 4, 5, 7, 1, 3, 6, 2]))
+// 分
+// [8,4,5,7]  [1,3,6,2]
+// [8,4][5,7]   [1,3][6,2]
+// 8 4   5 7   1 3   6 2
+
+// 治
+// [4,8] [5,7]   [1,3] [2,6]
+// [4,5,7,8] [1,2,3,6]
+// [1,2,3,4,5,6,7,8]
+
+// const climbStairs = function (n) {
+//   let a1 = 1
+//   let a2 = 2
+//   for (let i = 3; i <= n; i++) {
+//     [a1, a2] = [a2, a1 + a2]
+//   }
+//   return a2
+// }
+//
+// console.log(climbStairs(5))
+
+// const findContentChildren = function (g, s) {
+//   g.sort((a, b) => a - b)
+//   s.sort((a, b) => a - b)
+//   let gi = 0 //胃口值index
+//   let sj = 0 //饼干尺寸index
+//   let res = 0
+//   while (gi < g.length && sj < s.length) {
+//     if (s[sj] >= g[gi]) {
+//       gi++
+//       sj++
+//       res++
+//     } else {
+//       sj++
+//     }
+//   }
+//   return res
+// }
+//
+// console.log(findContentChildren([1, 2], [1, 2, 3]))
+//
+// const letterCombinations = function (digits) {
+//   if (!digits) {
+//     return []
+//   }
+//   const len = digits.length
+//   const map = new Map()
+//   map.set('2', 'abc')
+//     .set('3', 'def')
+//     .set('4', 'ghi')
+//     .set('5', 'jkl')
+//     .set('6', 'mno')
+//     .set('7', 'pqrs')
+//     .set('8', 'tuv')
+//     .set('9', 'wxyz')
+//   const result = []
+//
+//   // console.log(map)
+//   function generate(i, str) {
+//     if (i == len) {
+//       result.push(str)
+//       return
+//     }
+//     const tmp = map.get(digits[i])
+//     for (let r = 0; r < tmp.length; r++) {
+//       generate(i + 1, str + tmp[r])
+//     }
+//   }
+//
+//   generate(0, '')
+//   return result
+// }
+//
+// console.log(letterCombinations('23'))

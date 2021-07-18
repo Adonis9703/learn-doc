@@ -76,36 +76,36 @@ let findMedianSortedArrays = function (nums1, nums2) {
 // findMedianSortedArrays([],[2])
 
 //lc-5
-let longestPalindrome = function (s) {
-  function check(str) {
-    let len = Math.floor((str.length + 1) / 2)
-    for (let i = 0; i < len; i++) {
-      if (str[i] !== str[str.length - i - 1]) {
-        return false
-      }
-    }
-    return true
-  }
-
-  let map = new Map()
-  let max = ''
-  for (let i = 0; i < s.length; i++) {
-    for (let j = i; j < s.length + 1; j++) {
-      if (check(s.slice(i, j))) {
-        if (!map.get(s.slice(i, j))) {
-          map.set(s.slice(i, j), s.slice(i, j).length)
-        }
-      }
-    }
-  }
-  map.forEach((val, key) => {
-    if (max.length < val) {
-      max = key
-    }
-  })
-  console.log(max)
-  return max
-};
+// let longestPalindrome = function (s) {
+//   function check(str) {
+//     let len = Math.floor((str.length + 1) / 2)
+//     for (let i = 0; i < len; i++) {
+//       if (str[i] !== str[str.length - i - 1]) {
+//         return false
+//       }
+//     }
+//     return true
+//   }
+//
+//   let map = new Map()
+//   let max = ''
+//   for (let i = 0; i < s.length; i++) {
+//     for (let j = i; j < s.length + 1; j++) {
+//       if (check(s.slice(i, j))) {
+//         if (!map.get(s.slice(i, j))) {
+//           map.set(s.slice(i, j), s.slice(i, j).length)
+//         }
+//       }
+//     }
+//   }
+//   map.forEach((val, key) => {
+//     if (max.length < val) {
+//       max = key
+//     }
+//   })
+//   console.log(max)
+//   return max
+// };
 
 // longestPalindrome('aabswdaaabbsdbadbabdsda')
 
@@ -325,7 +325,7 @@ let mergeTwoLists = function (l1, l2) {
 const generateParenthesis = function (n) {
   const result = []
   const dfs = (lRemain, rRemain, str) => { //左右括号所剩的数量
-    if (str.length === 2*n) { //字符串构建完成
+    if (str.length === 2 * n) { //字符串构建完成
       result.push(str) //加入解集
       return //结束当前递归分支
     }
@@ -339,3 +339,108 @@ const generateParenthesis = function (n) {
   dfs(n, n, '') //递归入口
   return result
 }
+
+//lc-5 动态规划版
+
+const longestPalindrome = function (s) {
+  let len = s.length
+  let res = ''
+  //创建二维数组
+  let dp = Array.from(new Array(len), () => (new Array(len).fill(0)))
+  //从字符串首部开始
+  for (let i = 0; i < len; i++) {
+    //从字符串i前开始依次向前查找
+    for (let j = i; j >= 0; j--) {
+      dp[j][i] = s[i] == s[j] && (i - j < 2 || dp[j + 1][i - 1])
+      if (dp[j][i] && i - j + 1 > res.length) {
+        res = s.substring(j, i + 1)
+      }
+    }
+  }
+  console.log(dp)
+  return res
+}
+// console.log(longestPalindrome('ababa'))
+
+//lc-22 动态规划版本
+
+const generateParenthesis2 = function (n) {
+
+}
+
+//lc-53
+
+const maxSubArray = function (nums) {
+  // let max = nums[0]
+  // let pre = 0
+  // nums.forEach(x => {
+  //   pre = Math.max(pre + x, x)
+  //   max = Math.max(max, pre)
+  // })
+  // return max
+  let dp = []
+  dp[0] = nums[0] //边界值
+  let max = nums[0]
+  for (let i = 1; i <= nums.length; i++) {
+    dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]) //状态转移方程
+    if (max < dp[i]) {
+      max = dp[i]
+    }
+  }
+  return max
+}
+console.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
+
+//lc-118
+
+const generate = function (numRows) {
+  let res = []
+  for (let i = 0; i < numRows; i++) {
+    let temp = []
+    for (let j = 0; j <= i; j++) {
+      let sum = 0
+      if (!res[i - 1]) {
+        sum = 1
+      } else {
+        let left = res[i - 1][j - 1] || 0
+        let right = res[i - 1][j] || 0
+        sum = sum + left + right
+      }
+      temp.push(sum || 1)
+    }
+    res.push(temp)
+  }
+  return res
+}
+console.log(generate(5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
