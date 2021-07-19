@@ -389,7 +389,7 @@ const maxSubArray = function (nums) {
   }
   return max
 }
-console.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
+// console.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
 
 //lc-118
 
@@ -412,21 +412,87 @@ const generate = function (numRows) {
   }
   return res
 }
-console.log(generate(5))
+// console.log(generate(5))
 
 
+//lc-300
+
+const lengthOfLIS = function (nums) {
+  let n = nums.length
+  if (n === 0) {
+    return 0
+  }
+  let dp = new Array(n).fill(1)
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < i; j++) {
+      if (nums[j] < nums[i]) {
+        dp[i] = Math.max(dp[i], dp[j] + 1)
+      }
+    }
+  }
+  return Math.max(...dp)
+}
+// console.log(lengthOfLIS([10, 9, 2, 5, 3, 7, 101, 18]))
+
+//lc-121
+
+const maxProfit = function (prices) {
+  let res = 0
+  let left = Infinity
+  for (let i = 0; i < prices.length; i++) {
+    left = Math.min(left, prices[i])
+    res = Math.max(res, prices[i] - left)
+  }
+  return res
+}
+
+// console.log(maxProfit([7, 1, 5, 3, 6, 4]))
+
+//lc-338
+
+const countBits = function (n) {
+  let result = []
+  for (let i = 0; i <= n; i++) {
+    let count = 0
+    let temp = i.toString(2)
+    for (let j = 0; j < temp.length; j++) {
+      if (temp[j] == 1) {
+        count += 1
+      }
+    }
+    result.push(count)
+  }
+  return result
+}
+console.log(countBits(5))
 
 
+//lc-746
 
+const minCostClimbingStairs = function (cost) {
+  let dp = [0, 0]
+  let n = cost.length
+  for (let i = 2; i <= n; i++) {
+    dp[i] = Math.min(dp[i - 2] + cost[i - 2], dp[i - 1] + cost[i - 1])
+  }
+  return dp[n]
+}
+console.log(minCostClimbingStairs([10, 15, 20]))
 
+//lc-53 dp
 
-
-
-
-
-
-
-
+const maxSubArraydp = function (nums) {
+  //dp[i] = dp[i-1] + nums[i]
+  let dp = []
+  let res = 0
+  dp[0] = nums[0]
+  for (let i = 1; i < nums.length; i++) {
+    dp[i] = Math.max(dp[i-1]+nums[i], nums[i])
+    res = Math.max(dp[i], res)
+  }
+  return res
+}
+console.log(maxSubArraydp([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
 
 
 
