@@ -301,7 +301,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-  
+
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -533,15 +533,35 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-  
+
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
 //lc-213
 const rob2 = function (nums) {
+  if (nums.length === 1) {
+    return nums[0]
+  }
+  if (nums.length === 2) {
+    return Math.max(nums[0], nums[1])
+  }
+  let dp1 = []
+  let dp2 = []
 
+  dp1[0] = 0
+  dp1[1] = nums[1]
+  dp2[0] = nums[0]
+  dp2[1] = Math.max(nums[0], nums[1])
+
+  for (let i = 2; i < nums.length; i++) {
+    dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
+  }
+  for (let i = 2; i < nums.length - 1; i++) {
+    dp2[i] = Math.max(dp2[i - 2] + nums[i], dp2[i - 1])
+  }
+  return Math.max(dp1[nums.length - 1], dp2[nums.length - 2])
 }
-console.log('lc-213', rob2([1,2,3,1]))
+console.log('lc-213', rob2([1, 2, 3, 1]))
 
 
 

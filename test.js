@@ -198,52 +198,53 @@
 //防抖
 //触发高频事件后n秒内函数只会执行一次，如果n秒内高频事件再次触发，则重新计算时间
 //
-// function debounce(fn) {
-//   let timer = null //创建一个标记用来存放定时器
-//   return function () {
-//     clearTimeout(timer) //每当用户操作的时候便清除定时器
-//     timer = setTimeout(() => { //创建一个新的定时器
-//       fn.apply(this, arguments) //为了确保上下文环境为当前this，不能直接用fn
-//     }, 500)
-//   }
-// }
-//
-// function check() {
-//   console.log('防抖测试')
-// }
-//
-// // let input = document.getElementById('input')
-// // input.addEventListener('input', debounce(check))
-// let btn = document.getElementById('btn')
-// btn.addEventListener('click', debounce(check))
+function debounce(fn) {
+  let timer = null //创建一个标记用来存放定时器
+  return function (v) {
+    clearTimeout(timer) //每当用户操作的时候便清除定时器
+    timer = setTimeout(() => { //创建一个新的定时器
+      fn.apply(this, v) //为了确保上下文环境为当前this，不能直接用fn
+    }, 500)
+  }
+}
+
+function check() {
+  console.log('防抖测试')
+}
+
+// let input = document.getElementById('input')
+// input.addEventListener('input', debounce(check))
+let btn = document.getElementById('btn')
+btn.addEventListener('click', debounce(check))
 
 
 //节流
 //高频事件触发 但在n秒内只会执行一次，所以节流会稀释函数的执行频率
 //动作绑定事件，动作发生后一段时间后触发事件，在这段时间内，如果动作又发生，则无视该动作，直到事件执行完后，才能重新触发。
-// function throttle(fn) {
-//   let canRun = true //标记是否可以进行 //此处为闭包
-//   return function () {
-//     if (!canRun) return
-//     canRun = false
-//     setTimeout(() => { //将传入的方法放在setTimeout中执行
-//       // fn.apply(this, arguments)
-//       fn.apply(this, arguments)
-//       //关键在第一个参数，为了确保上下文环境为当前的this，所以不能直接用fn。
-//       // 最后在setTimeout执行完毕后再把标记设置为true
-//       //(关键)表示可以执行下一次循环了。
-//       //当定时器没有执行的时候标记永远是false，在开头被return掉
-//       canRun = true
-//     }, 500)
-//   }
-// }
-//
-// function checkThrottle() {
-//   console.log('节流测试')
-// }
-//
-// let btn2 = document.getElementById('btn2')
-// btn2.addEventListener('click', throttle(checkThrottle))
+function throttle(fn) {
+  let canRun = true //标记是否可以进行 //此处为闭包
+  return function () {
+    if (!canRun) return
+    canRun = false
+    setTimeout(() => { //将传入的方法放在setTimeout中执行
+      // fn.apply(this, arguments)
+      fn.apply(this, arguments)
+      //关键在第一个参数，为了确保上下文环境为当前的this，所以不能直接用fn。
+      // 最后在setTimeout执行完毕后再把标记设置为true
+      //(关键)表示可以执行下一次循环了。
+      //当定时器没有执行的时候标记永远是false，在开头被return掉
+      canRun = true
+    }, 500)
+
+  }
+}
+
+function checkThrottle() {
+  console.log('节流测试')
+}
+
+let btn2 = document.getElementById('btn2')
+btn2.addEventListener('click', throttle(checkThrottle))
 
 //判断是否为数组
 //1.Object.prototype.toString.call()
