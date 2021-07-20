@@ -201,7 +201,7 @@ let longestCommonPrefix = function (strs) {
   }
   return key
 }
-console.log(longestCommonPrefix(['flasdw', 'flqwd', 'flqws']))
+// console.log(longestCommonPrefix(['flasdw', 'flqwd', 'flqws']))
 
 // lc-19
 /**
@@ -301,7 +301,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-
+  
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -464,7 +464,7 @@ const countBits = function (n) {
   }
   return result
 }
-console.log(countBits(5))
+// console.log(countBits(5))
 
 
 //lc-746
@@ -477,7 +477,7 @@ const minCostClimbingStairs = function (cost) {
   }
   return dp[n]
 }
-console.log(minCostClimbingStairs([10, 15, 20]))
+// console.log(minCostClimbingStairs([10, 15, 20]))
 
 //lc-53 dp
 
@@ -487,20 +487,61 @@ const maxSubArraydp = function (nums) {
   let res = 0
   dp[0] = nums[0]
   for (let i = 1; i < nums.length; i++) {
-    dp[i] = Math.max(dp[i-1]+nums[i], nums[i])
+    dp[i] = Math.max(dp[i - 1] + nums[i], nums[i])
     res = Math.max(dp[i], res)
   }
   return res
 }
-console.log(maxSubArraydp([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
+// console.log(maxSubArraydp([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
 
+//lc-62
 
+//dp[m][n] =  dp[m-1][n] + dp[m][n-1]
+//dp[1][n] = 1
+//dp[m][1] = 1
 
+const uniquePaths = function (m, n) {
+  if (m === 1 || n === 1) {
+    return 1
+  }
+  let dp = new Array(m).fill(new Array(n).fill(0))
+  for (let i = 0; i < n; i++) dp[0][i] = 1
+  for (let i = 0; i < m; i++) dp[i][0] = 1
+  for (let i = 1; i < m; i++) {
+    for (let j = 1; j < n; j++) {
+      dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+    }
+  }
+  return dp[m - 1][n - 1]
+}
 
+console.log('lc-62', uniquePaths(3, 7))
 
+//lc-198
+const rob = function (nums) {
+  //dp[i] = Math.max(dp[i-2] + nums[i], dp[i-1])
+  //dp[0] = nums[0]
+  //dp[1] = Math.max(nums[0], nums[1])
+  //求dp[nums.length-1]
+  if (nums.length === 1) {
+    return nums[0]
+  }
+  let dp = []
+  dp[0] = nums[0]
+  dp[1] = Math.max(nums[0], nums[1])
+  for (let i = 2; i < nums.length; i++) {
+    dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
+  }
+  return dp[nums.length - 1]
+  
+}
+console.log('lc-198', rob([1, 1, 1, 2]))
 
+//lc-213
+const rob2 = function (nums) {
 
-
+}
+console.log('lc-213', rob2([1,2,3,1]))
 
 
 
