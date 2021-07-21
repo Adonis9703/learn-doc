@@ -9,12 +9,13 @@ module.exports = {
         children: [
           '/算法/',
           '/面试/',
-          '/javascript/',
           '/vue/',
           '/web/',
           '/style/',
           '/build/',
           '/Node/',
+          '/javascript/',
+          '/typescript/',
           {
             title: 'Style',
             children: [
