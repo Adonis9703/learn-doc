@@ -198,53 +198,53 @@
 //防抖
 //触发高频事件后n秒内函数只会执行一次，如果n秒内高频事件再次触发，则重新计算时间
 //
-function debounce(fn) {
-  let timer = null //创建一个标记用来存放定时器
-  return function (v) {
-    clearTimeout(timer) //每当用户操作的时候便清除定时器
-    timer = setTimeout(() => { //创建一个新的定时器
-      fn.apply(this, v) //为了确保上下文环境为当前this，不能直接用fn
-    }, 500)
-  }
-}
-
-function check() {
-  console.log('防抖测试')
-}
+// function debounce(fn) {
+//   let timer = null //创建一个标记用来存放定时器
+//   return function (v) {
+//     clearTimeout(timer) //每当用户操作的时候便清除定时器
+//     timer = setTimeout(() => { //创建一个新的定时器
+//       fn.apply(this, v) //为了确保上下文环境为当前this，不能直接用fn
+//     }, 500)
+//   }
+// }
+//
+// function check() {
+//   console.log('防抖测试')
+// }
 
 // let input = document.getElementById('input')
 // input.addEventListener('input', debounce(check))
-let btn = document.getElementById('btn')
-btn.addEventListener('click', debounce(check))
+// let btn = document.getElementById('btn')
+// btn.addEventListener('click', debounce(check))
 
 
 //节流
 //高频事件触发 但在n秒内只会执行一次，所以节流会稀释函数的执行频率
 //动作绑定事件，动作发生后一段时间后触发事件，在这段时间内，如果动作又发生，则无视该动作，直到事件执行完后，才能重新触发。
-function throttle(fn) {
-  let canRun = true //标记是否可以进行 //此处为闭包
-  return function () {
-    if (!canRun) return
-    canRun = false
-    setTimeout(() => { //将传入的方法放在setTimeout中执行
-      // fn.apply(this, arguments)
-      fn.apply(this, arguments)
-      //关键在第一个参数，为了确保上下文环境为当前的this，所以不能直接用fn。
-      // 最后在setTimeout执行完毕后再把标记设置为true
-      //(关键)表示可以执行下一次循环了。
-      //当定时器没有执行的时候标记永远是false，在开头被return掉
-      canRun = true
-    }, 500)
-
-  }
-}
-
-function checkThrottle() {
-  console.log('节流测试')
-}
-
-let btn2 = document.getElementById('btn2')
-btn2.addEventListener('click', throttle(checkThrottle))
+// function throttle(fn) {
+//   let canRun = true //标记是否可以进行 //此处为闭包
+//   return function () {
+//     if (!canRun) return
+//     canRun = false
+//     setTimeout(() => { //将传入的方法放在setTimeout中执行
+//       // fn.apply(this, arguments)
+//       fn.apply(this, arguments)
+//       //关键在第一个参数，为了确保上下文环境为当前的this，所以不能直接用fn。
+//       // 最后在setTimeout执行完毕后再把标记设置为true
+//       //(关键)表示可以执行下一次循环了。
+//       //当定时器没有执行的时候标记永远是false，在开头被return掉
+//       canRun = true
+//     }, 500)
+//
+//   }
+// }
+//
+// function checkThrottle() {
+//   console.log('节流测试')
+// }
+//
+// let btn2 = document.getElementById('btn2')
+// btn2.addEventListener('click', throttle(checkThrottle))
 
 //判断是否为数组
 //1.Object.prototype.toString.call()
@@ -687,63 +687,102 @@ btn2.addEventListener('click', throttle(checkThrottle))
 
 //手写 发布订阅模式 EventEmitter
 
-class EventEmitter {
+// class EventEmitter {
+//   constructor() {
+//     this.events = {} //事件对象，存放订阅的名字和事件 如：{click: [handle1, handle2]
+//   }
+//
+//   // 订阅事件的方法
+//   on(eventName, callback) {
+//     if (!this.events[eventName]) {
+//       //一个事件名可以订阅多个事件函数
+//       this.events[eventName] = [callback]
+//     } else {
+//       //存在则push到指定数组的尾部保存
+//       this.events[eventName].push(callback)
+//     }
+//   }
+//
+//   //触发事件的方法
+//   emit(eventName, ...args) {
+//     //遍历执行所有订阅的事件
+//     this.events[eventName] && this.events[eventName].forEach(fn => fn.apply(this, args))
+//   }
+//
+//   //移除订阅事件
+//   off(eventName, callback) {
+//     if (this.events[eventName]) {
+//       this.events[eventName] = this.events[eventName].filter(fn => fn !== callback)
+//     }
+//   }
+//
+//   //只执行一次订阅的事件，然后移除
+//   once(eventName, callback) {
+//     const fn = (...args) => {
+//       callback.apply(this, args)
+//       this.off(eventName, fn)
+//     }
+//     this.on(eventName, fn)
+//   }
+// }
+//
+// const event = new EventEmitter()
+// const handle = (...payload) => console.log(...payload)
+//
+// const sub = document.getElementById('subscribe')
+// const emit = document.getElementById('emit')
+// const off = document.getElementById('off')
+//
+// sub.addEventListener("click", () => {
+//   event.on('check', handle)
+// })
+// // event.on('check', handle)
+// emit.addEventListener("click", () => {
+//   event.emit('check', 'emit success')
+// })
+// off.addEventListener("click", () => {
+//   event.off('check', handle)
+// })
+// event.emit('check', 'success')
+
+// 观察者模式
+
+// 观察者
+class Observer {
   constructor() {
-    this.events = {} //事件对象，存放订阅的名字和事件 如：{click: [handle1, handle2]
   }
 
-  // 订阅事件的方法
-  on(eventName, callback) {
-    if (!this.events[eventName]) {
-      //一个事件名可以订阅多个事件函数
-      this.events[eventName] = [callback]
-    } else {
-      //存在则push到指定数组的尾部保存
-      this.events[eventName].push(callback)
-    }
-  }
-
-  //触发事件的方法
-  emit(eventName, ...args) {
-    //遍历执行所有订阅的事件
-    this.events[eventName] && this.events[eventName].forEach(fn => fn.apply(this, args))
-  }
-
-  //移除订阅事件
-  off(eventName, callback) {
-    if (this.events[eventName]) {
-      this.events[eventName] = this.events[eventName].filter(fn => fn !== callback)
-    }
-  }
-
-  //只执行一次订阅的事件，然后移除
-  once(eventName, callback) {
-    const fn = (...args) => {
-      callback.apply(this, args)
-      this.off(eventName, fn)
-    }
-    this.on(eventName, fn)
+  update(...args) {
+    console.log('do something', args)
   }
 }
 
-const event = new EventEmitter()
-const handle = (...payload) => console.log(...payload)
+//目标
+class Subject {
+  constructor() {
+    this.observers = [] //维护一个观察者列表
+  }
 
-const sub = document.getElementById('subscribe')
-const emit = document.getElementById('emit')
-const off = document.getElementById('off')
+  //添加观察者
+  add(observer) {
+    this.observers.push(observer)
+  }
 
-sub.addEventListener("click", () => {
-  event.on('check', handle)
-})
-// event.on('check', handle)
-emit.addEventListener("click", () => {
-  event.emit('check', 'emit success')
-})
-off.addEventListener("click", () => {
-  event.off('check', handle)
-})
-// event.emit('check', 'success')
+  remove(observer) {
+    this.observers = this.observers.filter(ob => ob !== observer)
+  }
+
+  //发布消息
+  notify(...args) {
+    this.observers.forEach(observer => observer.update(...args))
+  }
+}
+
+const subject = new Subject()
+subject.add(new Observer())
+subject.add(new Observer())
+
+subject.notify('a', 'b')
 
 //闭包循环自运行函数定时器
 // for (var i = 0; i < 5; i++) {
@@ -908,3 +947,22 @@ off.addEventListener("click", () => {
 // }
 //
 // console.log(letterCombinations('23'))
+
+let map = new Map()
+let m = {
+  name: 'm'
+}
+let f = function () {
+  console.log('function')
+}
+map.set(m, f)
+map.set(f, m)
+console.log(map)
+
+for (const [key, value] of map) {
+  console.log(`key:${key} value: ${value}`)
+}
+
+map.forEach((value, key) => {
+  console.log(`key:${key} value: ${value}`)
+})

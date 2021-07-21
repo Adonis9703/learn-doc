@@ -2,12 +2,24 @@
 title: 面试记录
 ---
 
-# 面经
+# 八股文
 
-## 手写EventEmitter
+## 发布/订阅模式 & 观察者模式
+
+发布/订阅模式和观察者模式最大的区别就是发布订阅模式有一个事件调度中心。
+
+![avater](/model-1.png)
+
+从图中可以看出，观察者模式中观察者和目标直接进行交互，而发布订阅模式中统一由调度中心进行处理，
+订阅者和发布者互不干扰，这样一方面实现了解耦，另一方面可以实现更细粒度的一些控制。比如发布者
+发布了很多消息，但是不想所有的订阅者都能接收，就可以在调度中心做一些控制，类似权限控制之类的，
+还可以做一些节流操作。
+
+### 发布/订阅模式
 
 EventEmitter 本质上是一个发布订阅模式。
 发布-订阅模式其实是一种对象间一对多的依赖关系，当一个对象的状态发送改变时，所有依赖于它的对象都将得到状态改变的通知。
+
 订阅者（Subscriber）把自己想订阅的事件注册（Subscribe）到调度中心（Event Channel），当发布者（Publisher）发布该事件（Publish Event）到调度中心，也就是该事件触发时，由调度中心统一调度（Fire Event）订阅者注册到调度中心的处理代码。
 
 ```javascript
@@ -56,9 +68,43 @@ event.on('check', handle)
 event.emit('check', 'success') 
 ```
 
-## CDN 加速
+### 观察者模式
 
-CDN 可以加快用户访问网络资源的速度和稳定性，减轻源服务器的访问压力
+在观察者模式中，观察者需要直接订阅目标事件；在目标发出内容改变的事件后，直接接收事件并作出响应
+
+```javascript
+//观察者
+class Observer {
+  constructor() {}
+  update(...args) {
+    console.log('do something', args)
+  }
+}
+
+//目标
+class Subject {
+  constructor() {
+    this.observers = [] //维护一个观察者列表
+  }
+  //添加观察者
+  add(observer) {
+    this.observers.push(observer)
+  }
+  remove(observer) {
+    this.observers = this.observers.filter(ob => ob !== observer)
+  }
+  //发布消息
+  notify(...args) {
+    this.observers.forEach(observer => observer.update(...args))
+  }
+}
+
+const subject = new Subject()
+subject.add(new Observer())
+subject.add(new Observer())
+
+subject.notify('a', 'b')
+```
 
 ## 计算机网络
 
@@ -72,7 +118,7 @@ OSI参考模型
 6. 表示层
 7. 应用层
 
-## TCP和 UDP
+### TCP和 UDP
 
 #### TCP
 
@@ -100,16 +146,9 @@ TCP是传输层协议，为了准确无误的把数据传输给目标，通过TC
 - TCP一对一，UDP可以多对多
 - TCP适用于要求可靠传输的应用，如文件传输。UDP适用于实时应用，电话、视频等
 
-## css 优先级
+### CDN 加速
 
-不同级别下：
-1. 在属性后使用`!important`会覆盖页面内任何位置定义的元素样式。
-2. 行内样式
-3. id选择器
-4. class类选择器
-5. 标签选择器
-6. 通配符选择器
-7. 浏览器默认属性
+CDN 可以加快用户访问网络资源的速度和稳定性，减轻源服务器的访问压力
 
 ## 浏览器原理
 
@@ -954,6 +993,16 @@ position:sticky是一个新的css3属性，它的表现类似position:relative�
 3. 父元素的高度不能低于sticky元素的高度
 4. sticky元素仅在其父元素内生效
 
+## css 优先级
+
+不同级别下：
+1. 在属性后使用`!important`会覆盖页面内任何位置定义的元素样式。
+2. 行内样式
+3. id选择器
+4. class类选择器
+5. 标签选择器
+6. 通配符选择器
+7. 浏览器默认属性
 
 ## new 操作符都做了些什么
 

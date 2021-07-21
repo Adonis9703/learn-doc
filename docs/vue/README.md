@@ -4,6 +4,15 @@ title: Vue 相关
 
 # Vue 相关
 
+## Vue 2.x 的全链路运作机制
+
+- 初始化以及挂载init，mount
+- 进行模板编译compile，将template编译为渲染函数render function
+- 执行render function 生成 Virtual DOM，render function => VNode tree
+- 再进行响应式依赖收集，render function => getter, setter => Watcher.update => patch。以及使用队列
+进行异步更新的策略
+- 最后通过diff算法进行patch更新视图
+
 ## 虚拟DOM
 
 虚拟DOM就是用JS去按照DOM结构来实现树形结构的对象，也可以叫做DOM对象。
@@ -459,7 +468,7 @@ patch(el, patches)
 
 hash 是URL中'#'符号及其后面的部分，常用作锚点在页面内进行导航，改变URL中的hash不会引起页面刷新。
 
-通过hashchange事件监听URL的变化，改变URL的方式只有这几种：
+通过`hashchange`事件监听URL的变化，改变URL的方式只有这几种：
 1. 通过浏览器进退改变URL
 2. 通过`<a>`标签改变URL
 3. 通过`window.location`改变URL
@@ -468,11 +477,11 @@ hash 是URL中'#'符号及其后面的部分，常用作锚点在页面内进行
 
 history提供了`pushState`和`replaceState`两个方法，这两个方法改变URL的path部分不会引起页面刷新
 
-history提供类似hashchange事件的popstate事件，但popstate事件有些不同：
+history提供类似`hashchange`事件的`popstate`事件，但`popstate`事件有些不同：
 
-1. 通过浏览器进退改变URL时会触发popstate事件
-2. 通过pushState/replaceState或`<a>`标签改变URL不会触发popstate事件
-3. 好在我们可以拦截pushState/replaceState的调用和`<a>`标签的点击事件来检测URL变化
+1. 通过浏览器进退改变URL时会触发`popstate`事件
+2. 通过`pushState/replaceState`或`<a>`标签改变URL不会触发`popstate`事件
+3. 好在我们可以拦截`pushState/replaceState`的调用和`<a>`标签的点击事件来检测URL变化
 4. 通过js调用history的back、go、forward方法可以触发该事件
 
 ### 基于hash实现

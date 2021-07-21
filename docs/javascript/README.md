@@ -4,6 +4,57 @@ title: JavaScript
 
 # JavaScript
 
+## Map & WeakMap
+
+### Map
+
+Map对象保存键值对。任何值（对象或者原始值）都可以作为一个键或一个值。
+
+#### 常见属性和方法
+
+- `size`：属性，取出字典的长度
+- `set(key, value)`：方法，向字典中添加新元素
+- `get(key)`：方法，通过键查找值
+- `has(key)`：方法，判断字典中是否存在键key
+- `delete(key)`：方法，删除键为key的值
+- `clear()`：方法，清空字典
+
+#### 与Object的区别
+
+- 一个Object的键只能是字符串或者Symbols，但一个Map的键可以是任意值
+- Map中的键值是有序的（FIFO），而添加到对象中的键值不是
+- Map的键值对个数可以通过size获取，而Object的键值对只能手动计算
+- Object有自己的原型，原型链上的键名可能会和自己设置的键名产生冲突，而Map中
+键不可重复，如果冲突则会覆盖对应的值
+
+```javascript
+let map = new Map()
+let m = {
+  name: 'm'
+}
+let f = function () {
+  console.log('function')
+}
+map.set(m, f)
+map.set(f, m)
+console.log(map)
+//for...of遍历
+for (const [key, value] of map) {
+  console.log(`key:${key} value: ${value}`)
+}
+//forEach遍历
+map.forEach((value, key) => {
+  console.log(`key:${key} value: ${value}`)
+})
+```
+
+### WeakMap
+
+WeakMap 对象是一组键值对的集合，其中的键是弱引用对象，而值可以是任意。
+
+
+## Set & WeakSet
+https://blog.csdn.net/weixin_40073115/article/details/104014232
 ## REST 参数
 
 es6 引入了rest参数（形式：...变量名），用于获取函数的多余参数，这样就不需要使用arguments对象了。rest参数搭配的变量是一个数组，该变量将多余的参数放入数组中。
