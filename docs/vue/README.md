@@ -196,7 +196,183 @@ function renderDom(el, target) {
 
 ## diff & patch
 
-### diff
+### Vue中的diff
+
+diff算法是通过同层的树节点进行比较的高效算法，避免了对树进行逐层搜索遍历，所以时间复杂度只有O(n)。
+
+diff算法有两个比较显著的特点：
+
+- 比较只会在同层级进行，不会跨层级比较。
+
+![avater](/diff-1.png)
+
+- 在diff比较的过程中，循环从两边向中间收拢
+
+![avater](/diff-2.png)
+
+#### diff 第一步
+
+vue的虚拟dom渲染真实dom的过程中首先会对新老VNode的开始和结束位置进行标记：oldStartIdx、oldEndIdx、newStartIdx、newEndIdx。
+
+```javascript
+let oldStartIdx = 0 // 旧节点开始下标
+let newStartIdx = 0 // 新节点开始下标
+let oldEndIdx = oldCh.length - 1 // 旧节点结束下标
+let oldStartVnode = oldCh[0]  // 旧节点开始vnode
+let oldEndVnode = oldCh[oldEndIdx] // 旧节点结束vnode
+let newEndIdx = newCh.length - 1 // 新节点结束下标
+let newStartVnode = newCh[0] // 新节点开始vnode
+let newEndVnode = newCh[newEndIdx] // 新节点结束vnode
+```
+
+经过第一步之后，我们初始的新旧VNode节点如下图所示：
+
+![avater](/diff-3.png)
+
+#### diff 第二步
+
+标记好节点位置之后，就开始进入到的 while 循环处理中，这里是 diff 算法的核心流程，分情况进行了新老节点的比较并移动对应的 VNode 节点。
+while 循环的退出条件是直到老节点或者新节点的开始位置大于结束位置。
+
+```javascript
+while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+  //...
+}
+```
+
+接下来具体介绍 while 循环中的处理逻辑， 循环过程中首先对新老 VNode 节点的头尾进行比较，寻找相同节点，
+如果有相同节点满足 sameVnode（可以复用的相同节点） 则直接进行 patchVnode (该方法进行节点复用处理)，
+并且根据具体情形，移动新老节点的 VNode 索引，以便进入下一次循环处理，一共有 2 * 2 = 4 种情形。下面根据代码展开分析:
+
+**情形一**：当新老Vnode节点的start满足sameVnode时，直接patchVnode即可，同时新老VNode节点的开始索引都加1。
+```javascript
+if (sameVnode(oldStartVnode, newStartVnode)) {
+  patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+  oldStartVnode = oldCh[++oldStartIdx]
+  newStartVnode = newCh[++newStartIdx]
+} 
+```
+
+**情形二**：当新老Vnode节点的end满足sameVnode时，同样直接patchVnode即可，同时新老Vnode节点的结束索引都减1。
+```javascript
+else if (sameVnode(oldEndVnode, newEndVnode)) {
+  patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
+  oldEndVnode = oldCh[--oldEndIdx]
+  newEndVnode = newCh[--newEndIdx]
+} 
+```
+
+**情形三**：当老Vnode节点的start和新Vnode节点的end满足sameVnode时，说明这次数据更新后oldStartVnode已经跑到了oldEndVnode后面
+去了。这时候patchVnode后，还需要将当前真实dom节点移动到oldEndVnode的后面，同时老Vnode节点开始索引加1，新Vnode节点的结束索引减1。
+
+```javascript
+else if (sameVnode(oldStartVnode, newEndVnode)) {
+  patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx)
+  canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm))
+  oldStartVnode = oldCh[++oldStartIdx]
+  newEndVnode = newCh[--newEndIdx]
+} 
+```
+
+**情形四**：当老Vnode节点的end和新Vnode节点的start满足sameVnode时，这说明这次数据更新后oldEndVnode跑到了oldStartVnode的前面去了。
+这时候在patchVnode后，还需要将当前真实dom节点移动到oldStartVnode的前面，同时老VNode节点结束索引减1，新VNode节点的开始所以加1。
+
+```javascript
+else if (sameVnode(oldEndVnode, newStartVnode))  {
+  patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+  canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm)
+  oldEndVnode = oldCh[--oldEndIdx]
+  newStartVnode = newCh[++newStartIdx]
+}
+```
+
+**如果都不满足以上四种情形，那说明没有相同的节点可以复用**。于是则通过查找事先建立好的以就的Vnode为key值，对应index序列为value值的
+哈希表。从这个哈希表中找到与newStartVnode一致key的旧的VNode节点，如果两者满足sameNode的条件，在进行patchVnode的同事会将这个真实dom移动到
+oldStartVnode对应的真实dom的前面；如果没有找到，则说明当前索引下的新的VNode节点在旧的VNode队列不存在，无法进行节点的复用，那么就只能
+调用createElm 创建一个新的dom节点放到当前newStartIdx的位置。
+
+```javascript
+else {// 没有找到相同的可以复用的节点，则新建节点处理
+        /* 生成一个key与旧VNode的key对应的哈希表（只有第一次进来undefined的时候会生成，也为后面检测重复的key值做铺垫） 
+        比如children是这样的 [{xx: xx, key: 'key0'}, {xx: xx, key: 'key1'}, {xx: xx, key: 'key2'}] 
+        beginIdx = 0 endIdx = 2 结果生成{key0: 0, key1: 1, key2: 2} */
+    if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+    /*如果newStartVnode新的VNode节点存在key并且这个key在oldVnode中能找到则返回这个节点的idxInOld（即第几个节点，下标）*/
+    idxInOld = isDef(newStartVnode.key)
+      ? oldKeyToIdx[newStartVnode.key]
+      : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx)
+    if (isUndef(idxInOld)) { // New element
+      /*newStartVnode没有key或者是该key没有在老节点中找到则创建一个新的节点*/
+      createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
+    } else {
+      /*获取同key的老节点*/
+      vnodeToMove = oldCh[idxInOld]
+      if (sameVnode(vnodeToMove, newStartVnode)) {
+        /*如果新VNode与得到的有相同key的节点是同一个VNode则进行patchVnode*/
+        patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
+        //因为已经patchVnode进去了，所以将这个老节点赋值undefined
+        oldCh[idxInOld] = undefined
+        /*当有标识位canMove实可以直接插入oldStartVnode对应的真实Dom节点前面*/
+        canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm)
+      } else {
+        // same key but different element. treat as new element
+        /*当新的VNode与找到的同样key的VNode不是sameVNode的时候（比如说tag不一样或者是有不一样type的input标签），创建一个新的节点*/
+        createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx)
+      }
+    }
+    newStartVnode = newCh[++newStartIdx]
+}
+```
+
+再来看看实例，第一次循环后，找到了就节点的末尾和新节点的开头（D）相同，于是直接复用D节点作为diff后创建的第一个真实节点。
+同时旧节点的endIndex移动到了C，新节点的startIndex移动到了C。
+
+![avater](/diff-4.png)
+
+紧接着开始第二次循环，第二次循环后，同样是旧节点的末尾和新节点的开头（C）相同，同理，diff后创建了C的真实节点并插入到第一次创建的
+D节点后面。同时旧节点的endIndex移动到了B，新节点的startIndex移动到了E。
+
+![avater](/diff-5.png)
+
+接下来第三次循环中，发现patchVnode的4种情况都不符合，于是在旧节点队列中查找当前的新节点E，结果发现没有找到，这时候只能直接创建新的
+真实节点E，插入到第二次创建的C节点之后。同时新节点的startIndex移动到了A。旧节点的startIndx和endIndex都保持不懂。
+
+![avater](/diff-6.png)
+
+第四次循环中，发现了新旧节点的开头相同（A），于是diff后创建了A的真实节点，插入到前一次创建的E节点之后。同时旧节点的startIndex移动到了
+B，新节点的startIndex移动到了B。
+
+![avater](/diff-7.png)
+
+第五次循环中，情形如第四次循环一样，因此diff后创建了B真实节点，插入到前一次创建的A节点之后。同时旧节点的startIndex移动到了C，新节点的
+startIndex移动到了F。
+
+![avater](/diff-8.png)
+
+这时候发现新节点的startIndex已经大于endIndex了，不在满足循环条件，因此结束循环，进行下一步。
+
+#### diff 第三步
+
+当 while 循环结束后，根据新老节点的数目不同，做相应的节点添加或者删除。若新节点数目大于老节点则需要把多出来的节点创建出来加入到真实 dom 中，
+反之若老节点数目大于新节点则需要把多出来的老节点从真实 dom 中删除。至此整个 diff 过程就已经全部完成了。
+
+```javascript
+ if (oldStartIdx > oldEndIdx) {
+      /*全部比较完成以后，发现oldStartIdx > oldEndIdx的话，说明老节点已经遍历完了，
+      新节点比老节点多， 所以这时候多出来的新节点需要一个一个创建出来加入到真实Dom中*/
+      refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm
+      addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue) //创建 newStartIdx - newEndIdx 之间的所有节点
+    } else if (newStartIdx > newEndIdx) {
+      /*如果全部比较完成以后发现newStartIdx > newEndIdx，则说明新节点已经遍历完了，
+      老节点多于新节点，这个时候需要将多余的老节点从真实Dom中移除*/
+      removeVnodes(oldCh, oldStartIdx, oldEndIdx) //移除 oldStartIdx - oldEndIdx 之间的所有节点
+    }
+```
+再回过头看我们的实例，新节点的数目大于旧节点，需要创建 newStartIdx 和 newEndIdx 之间的所有节点。在我们的实例中就是节点 F，因此直接创建 F 节点对应的真实节点放到 B 节点后面即可。
+
+![avater](/diff-9.png)
+
+### 手写简单diff
 
 diff算法的意义：给定任意两棵树，采用**先序深度优先遍历**的算法找到最少的转换步骤。
 
