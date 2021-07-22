@@ -948,21 +948,26 @@ subject.notify('a', 'b')
 //
 // console.log(letterCombinations('23'))
 
-let map = new Map()
-let m = {
-  name: 'm'
-}
-let f = function () {
-  console.log('function')
-}
-map.set(m, f)
-map.set(f, m)
-console.log(map)
+// let map = new Map()
+// let m = {
+//   name: 'm'
+// }
+// let f = function () {
+//   console.log('function')
+// }
+// map.set(m, f)
+// map.set(f, m)
+// console.log(map)
+//
+// for (const [key, value] of map) {
+//   console.log(`key:${key} value: ${value}`)
+// }
+//
+// map.forEach((value, key) => {
+//   console.log(`key:${key} value: ${value}`)
+// })
 
-for (const [key, value] of map) {
-  console.log(`key:${key} value: ${value}`)
-}
+const curry = (...a) => (...b) => (...c) => (console.log(...a,...b,...c))
 
-map.forEach((value, key) => {
-  console.log(`key:${key} value: ${value}`)
-})
+curry(1,2)(3,4)(5,6)
+
