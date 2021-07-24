@@ -4,6 +4,47 @@ title: JavaScript
 
 # JavaScript
 
+## 手写方法
+
+### 实现一个`add`函数
+
+要求如下：
+
+```javascript
+//可以无限制调用
+add(1)(2)(3, 4)
+add(1)(2)(3)(4)(5)
+//提供一个valueOf()函数输出所有参数的和
+add(1)(2)(3,4).valueOf() // 10
+```
+
+这题主要考了闭包的使用，函数的递归调用以及入参的收集。具体实现如下：
+
+```javascript
+const add = (...a) => {
+  let args = a //收集参数，利用作用域保存参数
+  let result = 0
+  const sum = (...b) => {
+    args.push(...b) //保存下一个参数，参数有可能为空
+    return sum //重点：返回sum函数用于接受之后的参数
+  }
+  sum.valueOf = () => { //重写valueOf 抛出结果
+    result = args.reduce((pre, cur) => {
+      return pre + cur
+    }, 0) //累加保存结果
+    return result 
+  }
+  return sum //返回sum函数用于接受下一个参数
+}
+console.log(add(1, 2)(3, 4)(5, 6).valueOf()) // 21
+```
+
+分析一下步骤：
+1. 调用`add(1,2)`函数，生成作用域，`args`和`result`都会被保存
+2. 执行`add(1,2)`，保存`1,2`到`args`，并返回`sum`函数等待接收后续参数（如果没有后续参数，sum函数并不会被调用）
+3. 执行`add(1,2)(3,4)`，此时相当于执行`sum(3,4)`，此时`args = [1,2,3,4]`，以此类推，将所有参数保存至`args`
+4. 最后调用`sum.valueOf()`，通过**闭包**，可以访问到`args`，累加后返回结果
+
 ## Map & WeakMap
 
 ### Map

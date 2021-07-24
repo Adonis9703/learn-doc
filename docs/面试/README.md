@@ -3,8 +3,7 @@ title: 面试记录
 ---
 
 # 八股文
-https://www.jianshu.com/p/48561530b519
-promise.all
+
 ## 发布/订阅模式 & 观察者模式
 
 发布/订阅模式和观察者模式最大的区别就是发布订阅模式有一个事件调度中心。
@@ -395,7 +394,7 @@ promise.then(res => {
 })
 ```
 
-## 手写一个Promise
+### 手写一个Promise
 
 首先了解Promise的基本特征：
 
@@ -414,67 +413,256 @@ promise.then(res => {
 
 
 ```javascript
+function resolvePromise(promiseNext, val, resolve, reject) {
+  // 自己等待自己是错误的实现，需要被结束promise
+  if (promiseNext === val) {
+    console.log('Chaining cycle detected for promise #<Promise>')
+    return reject(new TypeError('Chaining cycle detected for promise #<Promise>'))
+  }
+
+  //如果是promise对象，则调用它的resolve或者reject方法，目的是改变它的状态
+  if (val instanceof mPromise) {
+    val.then(resolve, reject)
+  } else {
+    resolve(val)
+  }
+}
+
 class mPromise {
   constructor(executor) {
     this.status = 'pending' //默认为pending
     this.resolved = undefined //成功状态 默认为undefined
     this.rejected = undefined //失败状态 默认为undefined
-   
+
     this.onResolvedCallbacks = [] //存放成功的回调
     this.onRejectedCallbacks = [] //存放失败的回调
-    
+
     let resolve = resolved => { //成功的方法
       if (this.status === 'pending') {
         this.status = 'fulfilled'
         this.resolved = resolved
         this.onResolvedCallbacks.forEach(fn => fn()) //依次执行回调函数
-      } 
+      }
     }
-    
+
     let reject = rejected => {
       if (this.status === 'pending') {
         this.status = 'rejected'
         this.rejected = rejected
         this.onRejectedCallbacks.forEach(fn => fn())
-      } 
+      }
     }
-    
+
     try {
       executor(resolve, reject) //尝试执行，将resolve和reject函数传给使用者
     } catch (e) {
       reject(e)
     }
   }
-  
+
   //定义一个then方法，并接受两个参数，分别是成功和失败的回调。
   then(onFulFilled, onRejected) {
-    if (this.status === 'fulfilled') {
-      onFulFilled(this.resolved)
-    } 
-    if (this.status === 'rejected') {
-      onRejected(this.rejected)
-    } 
-    // 如果promise的状态是 pending，需要将 onFulfilled 和 onRejected 函数存放起来，等待状态确定后，再依次将对应的函数执行
-   if (this.status === 'pending') {
-     this.onResolvedCallbacks.push(() => {
-       onFulFilled(this.resolved)
-     })
-     this.onRejectedCallbacks.push(() => {
-       onRejected(this.rejected)
-     })
-   }
+    onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : resolved => resolved
+    onRejected = typeof onRejected === 'function' ? onRejected : rejected => {
+      throw  rejected
+    }
+    //为了链式调用，创建一个Promise对象，并抛出
+    const promiseNext = new mPromise((resolve, reject) => {
+      if (this.status === 'fulfilled') {
+        //创建一个微任务等待 promiseNext 初始化完成
+        queueMicrotask(() => {
+          try {
+            const val = onFulFilled(this.resolved)
+            resolvePromise(promiseNext, val, resolve, reject)
+          } catch (e) {
+            reject(e) //如果失败直接reject
+          }
+        })
+      }
+      if (this.status === 'rejected') {
+        queueMicrotask(() => {
+          try {
+            const val = onRejected(this.rejected)
+            resolvePromise(promiseNext, val, resolve, reject)
+          } catch (e) {
+            reject(e)
+          }
+        })
+      }
+      if (this.status === 'pending') {
+        //等待，因为不知道后面状态的变化，所以先将回调方法保存起来
+        this.onResolvedCallbacks.push(() => {
+          queueMicrotask(() => {
+            try {
+              const val = onFulFilled(this.resolved)
+              resolvePromise(promiseNext, val, resolve, reject)
+            } catch (e) {
+              reject(e)
+            }
+          })
+        })
+        this.onRejectedCallbacks.push(() => {
+          queueMicrotask(() => {
+            try {
+              const val = onRejected(this.rejected)
+              resolvePromise(promiseNext, val, resolve, reject)
+            } catch (e) {
+              reject(e)
+            }
+          })
+        })
+      }
+    })
+    return promiseNext
+  }
+
+  static resolve(data) {
+    if (data instanceof mPromise) {
+      return data
+    }
+    return new mPromise((resolve, reject) => {
+      resolve(data)
+    })
+  }
+
+  static reject(err) {
+    return new mPromise((resolve, reject) => {
+      reject(err)
+    })
+  }
+  //一起进行，并返回全部结果，如果有一个失败就则返回失败
+  static all(values) {
+    if (!Array.isArray(values)) {
+      const type = typeof values
+      return new TypeError(`TypeError: ${type} ${values} is not iterable`)
+    }
+    return new mPromise((resolve, reject) => {
+      let resultArr = []
+      let orderIndex = 0
+      const processResultByKey = (value, index) => {
+        resultArr[index] = value
+        if (++orderIndex === values.length) {
+          resolve(resultArr)
+        }
+      }
+      for (let i = 0; i < values.length; i++) {
+        let value = values[i]
+        if (value && typeof value.then === 'function') {
+          value.then(res => {
+            processResultByKey(res, i)
+          }, reject)
+        } else {
+          processResultByKey(value, i)
+        }
+      }
+    })
+  }
+
+  //谁先完成就用谁的结果
+  static race(promises) {
+    return new mPromise((resolve, reject) => {
+      for (let i = 0; i < promises.length; i++) {
+        let val = promises[i]
+        if (val && typeof val.then === 'function') {
+          val.then(resolve, reject)
+        } else {
+          resolve(val)
+        }
+      }
+    })
   }
 }
 
-const promise = new mPromise((resolve, reject) => {
-  setTimeout(() => {
-    resolve('成功')
-  }, 1000)
-}).then(res => {
-  console.log('success', res)
-}, err => {
-})
+//catch 方法是 then 方法的语法糖，只接受 rejected 态的数据。
+mPromise.prototype.catch = function (errorCallback) {
+  return this.then(null, errorCallback)
+}
+
+// finally 方法，无论如何都会走到这里来的。
+// 在 finally 方法里面，不接受成功态或失败态的数据，走一个过场，直接值穿透到下一个里面去。
+// 适合把一些，成功态或失败态都有的逻辑放在这里面。
+mPromise.prototype.finally = function (callback) {
+  return this.then(res => {
+    return mPromise.resolve(callback()).then(() => res)
+  }, err => {
+    return mPromise.resolve(callback()).then(() => {
+      throw err
+    })
+  })
+}
 ```
+测试一下这些方法：
+```javascript
+//测试 catch
+mPromise.reject(123).catch(err => {
+  console.log('catch', err) //123
+})
+
+//测试 finally
+mPromise.reject(123).finally(() => {
+  return new mPromise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(456)
+    }, 1000)
+  })
+}).then(res => {
+  console.log('finally', res) //123
+}, err => {
+  console.log('finally', err)
+})
+
+//测试 race
+let r1 = new mPromise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('300')
+  }, 300)
+})
+let r2 = new mPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('400')
+  }, 400)
+})
+
+mPromise.race([r1, r2]).then(res => {
+  console.log(res)
+})
+
+//测试resolve
+mPromise.resolve().then(() => {
+  console.log(0)
+  return mPromise.resolve(1)
+}).then(res => {
+  console.log(res)
+})
+
+//测试all
+let p1 = new mPromise(resolve => {
+  setTimeout(() => {
+    resolve('p1')
+  }, 1000)
+})
+let p2 = new mPromise(resolve => {
+  setTimeout(() => {
+    resolve('p2')
+  }, 1000)
+})
+let p3 = new mPromise((resolve, reject) => {
+  setTimeout(() => {
+    reject('p3')
+  }, 500)
+})
+
+mPromise.all([1, 2, p1, p2]).then(res => {
+  console.log(res)
+}) // [1, 2, 'p1', 'p2']
+
+mPromise.all([1, 2, p1, p2, p3]).then(res => {
+  console.log('all', res)
+}, err => {
+  console.log('reject', err)
+}) // reject p3
+```
+
 
 ## 实现一个类
 
