@@ -1,3 +1,141 @@
+//lc-206
+const reverseList = function (head) {
+  let prev = null, curr = head
+  while (curr) {
+    const next = curr.next
+    curr.next = prev
+    prev = curr
+    curr = next
+  }
+  return prev
+}
+//lc-1
+const twoSum = function (nums, target) {
+  for (let i = 0; i < nums.length; i++) {
+    let diff = target - nums[i]
+    if (nums.indexOf(diff) !== -1 && nums.indexOf(diff) !== i) {
+      return [i, nums.indexOf(diff)]
+    }
+  }
+}
+//lc-989
+const addToArrayForm = function (num, k) {
+
+}
+
+//lc-665
+const checkPossibility = function (nums) {
+
+}
+
+//lc-141
+const hasCycle = function (head) {
+  let fast = head
+  let slow = head
+  while (fast) {
+    fast = fast.next
+    if (fast.next) {
+      fast = fast.next
+    }
+    if (fast === slow) {
+      return true
+    }
+    slow = slow.next
+  }
+  return false
+}
+//lc-400
+const findNthDigit = function (n) {
+  //12345678910111213
+  //1 1-9 共有 10^0*9*1个数
+  //2 10-99 共有 10^1*9*2个数
+  //3 100-999 共有 10^2*9*3 个数
+  //x 10^(x-1)*9*x
+  let digit = 1 //数位 1十位 2百位 3千位等
+  let start = 1 //起始点数（个位1，十位10，百位100）
+  let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
+
+  while (n > count) {
+    //找出n属于哪个数位里的索引
+    n -= count
+    ++digit
+    start *= 10
+    count = digit * 9 * start
+  }
+  let num = start + (n - 1) / digit
+  let remainder = (n - 1) % digit
+  num = num.toString()
+  return Number(num[remainder])
+}
+
+//lc-221
+const maximalSquare = function (matrix) {
+
+}
+//lc-2046 offer-57-II
+const findContinuousSequence = function (target) {
+  //滑动窗口
+  let sum = 0
+  let left = 1
+  let right = 1
+  let result = []
+  while (left < target / 2) {
+    if (sum < target) {
+      sum += right
+      right++
+    } else if (sum > target) {
+      sum -= left
+      left++
+    } else {
+      let arr = []
+      for (let i = left; i < right; i++) {
+        arr.push(i)
+      }
+      result.push(arr)
+      sum -= left
+      left++
+    }
+  }
+  return result
+}
+
+// console.log('offer 57', findContinuousSequence(15))
+
+//lc-888
+const fairCandySwap = function (aliceSizes, bobSizes) {
+  let sumA = aliceSizes.reduce((pre, cur) => {
+    return pre + cur
+  }, 0)
+  let sumB = bobSizes.reduce((pre, cur) => {
+    return pre + cur
+  }, 0)
+  let diff = sumA - sumB
+  for (let i = 0; i < aliceSizes.length; i++) {
+    for (let j = 0; j < bobSizes.length; j++) {
+      if (aliceSizes[i] - bobSizes[j] === diff / 2) {
+        return [aliceSizes[i], bobSizes[j]]
+      }
+    }
+  }
+}
+console.log('lc-888', fairCandySwap([1, 2, 5], [2, 4]))
+//lc-28
+const strStr = function (haystack, needle) {
+  if (!needle) return 0
+  return haystack.indexOf(needle)
+}
+//lc-58
+const lengthOfLastWord = function (s) {
+  let arr = s.trim().split(' ')
+  arr.reverse()
+  return arr[0].length || 0
+}
+
+//lc-6
+const convert = function (s, numRows) {
+
+}
+
 // lc-2
 function ListNode(val, next) {
   this.val = val === undefined ? 0 : val
@@ -179,6 +317,10 @@ let maxArea = function (height) {
     }
   }
   return max
+}
+
+const maxArea2 = function (height) {
+
 }
 
 // console.log(maxArea([1, 8, 6, 2, 5, 4, 8, 3, 7]))
