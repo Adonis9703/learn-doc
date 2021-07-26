@@ -20,9 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4eafbbf0-7391-454e-bf62-c9959cfe85b8" name="Default Changelist" comment="UPDATE">
+      <change afterPath="$PROJECT_DIR$/huawei.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/leetcode.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/算法/leetcode.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nowcoder.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/算法/nowcoder.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/axios请求封装.js" beforeDir="false" afterPath="$PROJECT_DIR$/docs/axios请求封装.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,18 +66,18 @@
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\MyProjects\learn-doc\docs\.vuepress\public" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\YUSIYUAN\Documents\Codes\learn-doc\docs" />
       <recent name="C:\Users\YUSIYUAN\Documents\Codes\learn-doc\docs\算法" />
       <recent name="C:\Users\YUSIYUAN\Documents\Codes\learn-doc\docs\.vuepress\public" />
       <recent name="E:\MyProjects\learn-doc\docs\style\flex" />
       <recent name="E:\MyProjects\learn-doc\docs\.vuepress\components\playground" />
-      <recent name="E:\MyProjects\learn-doc\docs\.vuepress\public" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\MyProjects\learn-doc\docs\.vuepress\public" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.leetcode.js">
+  <component name="RunManager" selected="npm.docs:dev">
     <configuration name="index.js (1)" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/docs/build/index.js" working-dir="$PROJECT_DIR$/docs/build">
       <method v="2" />
     </configuration>
@@ -102,9 +102,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="npm.docs:dev" />
         <item itemvalue="Node.js.leetcode.js" />
         <item itemvalue="Node.js.test.js" />
-        <item itemvalue="npm.docs:dev" />
         <item itemvalue="Node.js.index.js (1)" />
         <item itemvalue="Node.js.index.js" />
       </list>
@@ -162,7 +162,9 @@
       <workItem from="1626954653468" duration="486000" />
       <workItem from="1626965806878" duration="797000" />
       <workItem from="1627094217911" duration="22274000" />
-      <workItem from="1627177760801" duration="17096000" />
+      <workItem from="1627177760801" duration="17131000" />
+      <workItem from="1627295204300" duration="633000" />
+      <workItem from="1627296953205" duration="4111000" />
     </task>
     <task id="LOCAL-00001" summary="UPDATE 建立vue press 文档">
       <created>1577944524120</created>
@@ -381,7 +383,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627129945217</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="UPDATE">
+      <created>1627220958591</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1627220958591</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -425,9 +434,9 @@
     <MESSAGE value="UPDATE files" />
     <MESSAGE value="UPDATE 算法" />
     <MESSAGE value="UPDATE reflect" />
-    <MESSAGE value="UPDATE" />
     <MESSAGE value="UPDATE promise" />
-    <option name="LAST_COMMIT_MESSAGE" value="UPDATE promise" />
+    <MESSAGE value="UPDATE" />
+    <option name="LAST_COMMIT_MESSAGE" value="UPDATE" />
   </component>
   <component name="WindowStateProjectService">
     <state x="1374" y="358" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1627096559223">
@@ -450,26 +459,26 @@
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
     <state x="1700" y="108" key="FileChooserDialogImpl/0.0.2560.1400@0.0.2560.1400" timestamp="1626088876135" />
-    <state width="1234" height="226" key="GridCell.Tab.0.bottom" timestamp="1627219092521">
+    <state width="1234" height="224" key="GridCell.Tab.0.bottom" timestamp="1627297477757">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="1234" height="226" key="GridCell.Tab.0.bottom/0.0.2560.1400@0.0.2560.1400" timestamp="1627219092521" />
-    <state width="1234" height="226" key="GridCell.Tab.0.center" timestamp="1627219092521">
+    <state width="1234" height="224" key="GridCell.Tab.0.bottom/0.0.2560.1400@0.0.2560.1400" timestamp="1627297477757" />
+    <state width="1234" height="224" key="GridCell.Tab.0.center" timestamp="1627297477757">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="1234" height="226" key="GridCell.Tab.0.center/0.0.2560.1400@0.0.2560.1400" timestamp="1627219092521" />
-    <state width="1234" height="226" key="GridCell.Tab.0.left" timestamp="1627219092521">
+    <state width="1234" height="224" key="GridCell.Tab.0.center/0.0.2560.1400@0.0.2560.1400" timestamp="1627297477757" />
+    <state width="1234" height="224" key="GridCell.Tab.0.left" timestamp="1627297477757">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="1234" height="226" key="GridCell.Tab.0.left/0.0.2560.1400@0.0.2560.1400" timestamp="1627219092521" />
-    <state width="1234" height="226" key="GridCell.Tab.0.right" timestamp="1627219092521">
+    <state width="1234" height="224" key="GridCell.Tab.0.left/0.0.2560.1400@0.0.2560.1400" timestamp="1627297477757" />
+    <state width="1234" height="224" key="GridCell.Tab.0.right" timestamp="1627297477757">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state width="1234" height="226" key="GridCell.Tab.0.right/0.0.2560.1400@0.0.2560.1400" timestamp="1627219092521" />
-    <state x="1512" y="436" key="Vcs.Push.Dialog.v2" timestamp="1626966004271">
+    <state width="1234" height="224" key="GridCell.Tab.0.right/0.0.2560.1400@0.0.2560.1400" timestamp="1627297477757" />
+    <state x="1512" y="436" key="Vcs.Push.Dialog.v2" timestamp="1627220962232">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
-    <state x="1512" y="436" key="Vcs.Push.Dialog.v2/0.0.2560.1400@0.0.2560.1400" timestamp="1626966004271" />
+    <state x="1512" y="436" key="Vcs.Push.Dialog.v2/0.0.2560.1400@0.0.2560.1400" timestamp="1627220962232" />
     <state x="1713" y="616" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1627094226938">
       <screen x="0" y="0" width="2560" height="1400" />
     </state>
