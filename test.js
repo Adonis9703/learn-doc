@@ -628,7 +628,7 @@ function resolvePromise(promiseNext, val, resolve, reject) {
     console.log('Chaining cycle detected for promise #<Promise>')
     return reject(new TypeError('Chaining cycle detected for promise #<Promise>'))
   }
-
+  
   //如果是promise对象，则调用它的resolve或者reject方法，目的是改变它的状态
   if (val instanceof mPromise) {
     val.then(resolve, reject)
@@ -642,10 +642,10 @@ class mPromise {
     this.status = 'pending' //默认为pending
     this.resolved = undefined //成功状态 默认为undefined
     this.rejected = undefined //失败状态 默认为undefined
-
+    
     this.onResolvedCallbacks = [] //存放成功的回调
     this.onRejectedCallbacks = [] //存放失败的回调
-
+    
     let resolve = resolved => { //成功的方法
       if (this.status === 'pending') {
         this.status = 'fulfilled'
@@ -653,7 +653,7 @@ class mPromise {
         this.onResolvedCallbacks.forEach(fn => fn()) //依次执行回调函数
       }
     }
-
+    
     let reject = rejected => {
       if (this.status === 'pending') {
         this.status = 'rejected'
@@ -661,14 +661,14 @@ class mPromise {
         this.onRejectedCallbacks.forEach(fn => fn())
       }
     }
-
+    
     try {
       executor(resolve, reject) //尝试执行，将resolve和reject函数传给使用者
     } catch (e) {
       reject(e)
     }
   }
-
+  
   //定义一个then方法，并接受两个参数，分别是成功和失败的回调。
   then(onFulFilled, onRejected) {
     onFulFilled = typeof onFulFilled === 'function' ? onFulFilled : resolved => resolved
@@ -724,7 +724,7 @@ class mPromise {
     })
     return promiseNext
   }
-
+  
   static resolve(data) {
     if (data instanceof mPromise) {
       return data
@@ -733,13 +733,13 @@ class mPromise {
       resolve(data)
     })
   }
-
+  
   static reject(err) {
     return new mPromise((resolve, reject) => {
       reject(err)
     })
   }
-
+  
   //一起进行，并返回全部结果，如果有一个失败就则返回失败
   static all(values) {
     if (!Array.isArray(values)) {
@@ -767,7 +767,7 @@ class mPromise {
       }
     })
   }
-
+  
   //谁先完成就用谁的结果
   static race(promises) {
     return new mPromise((resolve, reject) => {
@@ -973,7 +973,7 @@ mPromise.all([1, 2, p1, p2, p3]).then(res => {
 class Observer {
   constructor() {
   }
-
+  
   update(...args) {
     console.log('do something', args)
   }
@@ -984,16 +984,16 @@ class Subject {
   constructor() {
     this.observers = [] //维护一个观察者列表
   }
-
+  
   //添加观察者
   add(observer) {
     this.observers.push(observer)
   }
-
+  
   remove(observer) {
     this.observers = this.observers.filter(ob => ob !== observer)
   }
-
+  
   //发布消息
   notify(...args) {
     this.observers.forEach(observer => observer.update(...args))
@@ -1227,13 +1227,56 @@ subject.notify('a', 'b')
 // console.log(add2(1,2)(3,4).valueOf())
 
 
+const all = (promises) => {
+  return new Promise((resolve, reject) => {
+    let results = []
+    for (let i = 0; i < promises.length; i++) {
+      let promise = promises[i]
+      promise.then(res => {
+        results.push(res)
+        if (results.length === promises.length) {
+          resolve(results)
+        }
+      }, reject)
+    }
+  })
+}
 
+const race = (promises) => {
+  return new Promise((resolve, reject) => {
+    for (let i = 0; i < promises.length; i++) {
+      promises[i].then(resolve, reject)
+    }
+  })
+}
 
+let pr1 = new Promise(resolve => {
+  setTimeout(() => {
+    resolve('pr1')
+  }, 300)
+})
+let pr2 = new Promise(resolve => {
+  setTimeout(() => {
+    resolve('pr2')
+  }, 500)
+})
 
+let pr3 = new Promise(resolve => {
+  setTimeout(() => {
+    resolve('pr3')
+  }, 800)
+})
+console.log('test test')
+all([pr1, pr2, pr3]).then(res => {
+  console.log(res)
+})
+race([pr1, pr2, pr3]).then(res => {
+  console.log('race', res)
+})
 
-
-
-
+// Promise.all([pr1, pr2, pr3]).then(res => {
+//   console.log(res)
+// })
 
 
 

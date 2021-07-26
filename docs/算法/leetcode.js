@@ -1,3 +1,49 @@
+//lc-566
+const matrixReshape = function (mat, r, c) {
+  let flatMat = mat.flat(Infinity)
+  if (r * c > flatMat.length) {
+    return mat
+  }
+  let newMat = []
+  for (let i = 0; i < flatMat.length; i++) {
+    if ((i + 1) % c === 0) {
+      let temp = flatMat.slice(i - c + 1, i+1)
+      newMat.push(temp)
+    }
+  }
+  return newMat
+}
+console.log('lc-566', matrixReshape([[1, 2],[3, 4]], 1, 4),)
+//lc-350
+const intersect = function (nums1, nums2) {
+  let short = nums1.length > nums2.length ? nums2 : nums1
+  let long = nums1.length > nums2.length ? nums1 : nums2
+  let map = {}
+  for (let i = 0; i < short.length; i++) {
+    if (map[short[i]] === undefined) {
+      map[short[i]] = 1
+    } else {
+      map[short[i]]++
+    }
+  }
+  let result = []
+  for (let i = 0; i < long.length; i++) {
+    if (map[long[i]] !== undefined && --map[long[i]] >= 0) {
+      result.push(long[i])
+    }
+  }
+  return result
+}
+console.log('lc-350', intersect([4, 9, 5], [2, 2, 9, 4, 9, 6, 8, 4]))
+//lc-88
+const merge = function (nums1, m, nums2, n) {
+  nums1.splice(m)
+  nums1.push(...nums2)
+  nums1.sort((a, b) => a - b)
+  return nums1
+}
+
+console.log('lc-88', merge([1, 2, 3, 0, 0, 0], 3, [2, 5, 6], 3))
 //lc-206
 const reverseList = function (head) {
   let prev = null, curr = head
@@ -54,7 +100,7 @@ const findNthDigit = function (n) {
   let digit = 1 //数位 1十位 2百位 3千位等
   let start = 1 //起始点数（个位1，十位10，百位100）
   let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
-
+  
   while (n > count) {
     //找出n属于哪个数位里的索引
     n -= count
@@ -443,7 +489,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-
+  
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -675,7 +721,7 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-
+  
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
@@ -689,12 +735,12 @@ const rob2 = function (nums) {
   }
   let dp1 = []
   let dp2 = []
-
+  
   dp1[0] = 0
   dp1[1] = nums[1]
   dp2[0] = nums[0]
   dp2[1] = Math.max(nums[0], nums[1])
-
+  
   for (let i = 2; i < nums.length; i++) {
     dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
   }
