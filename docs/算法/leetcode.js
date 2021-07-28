@@ -1,3 +1,97 @@
+//https://labuladong.gitbook.io/algo/
+//lc-104
+const maxDepth = function (root) {
+  if (!root) {
+    return 0
+  } else {
+    let leftH = maxDepth(root.left)
+    let rightH = maxDepth(root.right)
+    return Math.max(leftH, rightH) + 1
+  }
+}
+//lc-100
+const isSameTree = function (p, q) {
+  if (p === null && q === null) {
+    return true
+  }
+  if (p === null || q === null) {
+    return false
+  }
+  if (p.val !== q.val) {
+    return false
+  }
+  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right)
+}
+//lc-145 后续遍历 迭代
+const postorderTraversal = function (root) {
+  let stack = []
+  let res = []
+  while (root || stack.length) {
+    while (root) { //先遍历右子树，再遍历左子树
+      stack.push(root)//ACF
+      res.unshift(root.val)  //      DEBFCA
+      root = root.right
+    }
+    root = stack.pop()
+    root = root.left
+  }
+  return res
+}
+//lc-144 前序遍历 迭代
+const preorderTraversal = function (root) {
+  let stack = []
+  let res = []
+  while (root || stack.length) {
+    while (root) {
+      res.push(root.val) //1,2,4,2
+      stack.push(root)//1/
+      root = root.left
+    }
+    root = stack.pop()
+    root = root.right
+  }
+  return res
+}
+//lc-94 中序遍历 递归
+const inorderTraversal = function (root) {
+  let result = []
+  let handler = (node) => {
+    if (!node) {
+      return
+    }
+    //前序
+    // result.push(node.val)
+    // handler(node.left)
+    // handler(node.right)
+    
+    //中序
+    handler(node.left)
+    result.push(node.val)
+    handler(node.right)
+    
+    //后序
+    // handler(node.left)
+    // handler(node.right)
+    // result.push(node.val)
+  }
+  handler(root)
+  return result
+}
+//lc-94 中序遍历 迭代
+const inorderTraversal2 = function (root) {
+  let stack = []
+  let res = []
+  while (root || stack.length) {
+    while (root) {
+      stack.push(root)
+      root = root.left
+    }
+    root = stack.pop()
+    res.push(root.val)
+    root = root.right
+  }
+  return res
+}
 //lc-387
 const firstUniqChar = function (s) {
   let map = {}
@@ -118,7 +212,7 @@ const findNthDigit = function (n) {
   let digit = 1 //数位 1十位 2百位 3千位等
   let start = 1 //起始点数（个位1，十位10，百位100）
   let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
-
+  
   while (n > count) {
     //找出n属于哪个数位里的索引
     n -= count
@@ -507,7 +601,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-
+  
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -739,7 +833,7 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-
+  
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
@@ -753,12 +847,12 @@ const rob2 = function (nums) {
   }
   let dp1 = []
   let dp2 = []
-
+  
   dp1[0] = 0
   dp1[1] = nums[1]
   dp2[0] = nums[0]
   dp2[1] = Math.max(nums[0], nums[1])
-
+  
   for (let i = 2; i < nums.length; i++) {
     dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
   }
