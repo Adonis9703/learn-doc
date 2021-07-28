@@ -1,4 +1,129 @@
 //https://labuladong.gitbook.io/algo/
+//lc-654
+
+function TreeNode(val, left, right) {
+  this.val = (val === undefined ? 0 : val)
+  this.left = (left === undefined ? null : left)
+  this.right = (right === undefined ? null : right)
+}
+
+//lc-98
+const isValidBST = function (root) {
+  let handle = (node, lower, upper) => {
+    if (!node) {
+      return true
+    }
+    if (node.val <= lower || node.val >= upper) {
+      return false
+    }
+    return handle(node.left, lower, node.val) && handle(node.right, node.val, upper)
+  }
+  return handle(root, -Infinity, Infinity)
+}
+//lc-654
+const constructMaximumBinaryTree = function (nums) {
+  if (!nums.length) {
+    return nums
+  }
+  let handler = (nums, lo, hi) => {
+    if (lo > hi) {
+      return null
+    }
+    let maxKey = 0
+    let max = -Infinity
+    for (let i = lo; i <= hi; i++) {
+      if (nums[i] > max) {
+        max = nums[i]
+        maxKey = i
+      }
+    }
+    let root = new TreeNode(max)
+    root.left = handler(nums, lo, maxKey - 1)
+    root.right = handler(nums, maxKey + 1, hi)
+    return root
+  }
+  return handler(nums, 0, nums.length - 1)
+}
+//lc-114
+const flatten = function (root) {
+  if (root === null) {
+    return root
+  }
+  //递归
+  flatten(root.left)
+  flatten(root.right)
+  //后序遍历 主操作
+  let l = root.left
+  let r = root.right
+
+  root.left = null
+  root.right = l
+  //将原先的右子树接到当前右子树的末端
+  let temp = root
+  while (temp.right !== null) {
+    temp = temp.right
+  }
+  temp.right = r
+}
+//lc-116
+const connect = function (root) {
+  if (root === null) {
+    return root
+  }
+  let handler = (l, r) => {
+    //前序遍历主操作
+    if (l === null || r === null) {
+      return
+    }
+    l.next = r
+    //递归
+    handler(l.left, l.right)
+    handler(r.left, r.right)
+    handler(l.right, r.left)
+  }
+  handler(root.left, root.right)
+  return root
+}
+//lc-226
+const invertTree = function (root) {
+  if (!root) {
+    return
+  }
+  let temp = root.left
+  root.left = root.right
+  root.right = temp
+  invertTree(root.left)
+  invertTree(root.right)
+
+  return root
+}
+//lc-101 递归
+const isSymmetric = function (root) {
+  let left = root.left
+  let right = root.right
+  if (!root) {
+    return true
+  }
+  let handler = (l, r) => {
+    if (l === null && r === null) {
+      return true
+    }
+    if (l === null || r === null) {
+      return false
+    }
+    if (l.val !== r.val) {
+      return false
+    }
+    if (l.val === r.val) {
+      return handler(l.left, r.right) && handler(l.right, r.left)
+    }
+  }
+  return handler(left, right)
+}
+//lc-111
+const minDepth = function (root) {
+
+}
 //lc-104
 const maxDepth = function (root) {
   if (!root) {
@@ -63,12 +188,12 @@ const inorderTraversal = function (root) {
     // result.push(node.val)
     // handler(node.left)
     // handler(node.right)
-    
+
     //中序
     handler(node.left)
     result.push(node.val)
     handler(node.right)
-    
+
     //后序
     // handler(node.left)
     // handler(node.right)
@@ -212,7 +337,7 @@ const findNthDigit = function (n) {
   let digit = 1 //数位 1十位 2百位 3千位等
   let start = 1 //起始点数（个位1，十位10，百位100）
   let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
-  
+
   while (n > count) {
     //找出n属于哪个数位里的索引
     n -= count
@@ -601,7 +726,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-  
+
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -833,7 +958,7 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-  
+
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
@@ -847,12 +972,12 @@ const rob2 = function (nums) {
   }
   let dp1 = []
   let dp2 = []
-  
+
   dp1[0] = 0
   dp1[1] = nums[1]
   dp2[0] = nums[0]
   dp2[1] = Math.max(nums[0], nums[1])
-  
+
   for (let i = 2; i < nums.length; i++) {
     dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
   }
