@@ -1,4 +1,51 @@
 //https://labuladong.gitbook.io/algo/
+//lc-64
+const minPathSum = function (grid) {
+
+}
+//lc-239 滑动窗口
+const maxSlidingWindow = function (nums, k) {
+  let left = 0
+  let right = k - 1
+  
+}
+//lc-283
+const moveZeroes = function (nums) {
+  let len = nums.length
+  for (let i = 0; i < len;) {
+    if (nums[i] === 0) {
+      nums.push(0)
+      nums.splice(i, 1)
+      len--
+    } else {
+      i++
+    }
+  }
+}
+//lc-572
+const isSubtree = function (root, subRoot) {
+  const handler = (node, subNode) => {
+    if (node === null && subNode === null) {
+      return true
+    }
+    if (node === null || subNode === null || node.val !== subNode.val) {
+      return false
+    }
+    if (node.val === subNode.val) {
+      return handler(node.left, subNode.left) && handler(node.right, subNode.right)
+    }
+  }
+  if (!root) {
+    return false
+  }
+  // return handler(root, subRoot) || handler(root.left, subRoot) || handler(root.right, subRoot)
+  if (handler(root, subRoot)) {
+    return true
+  } else {
+    return isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot)
+  }
+}
+
 //lc-654
 
 function TreeNode(val, left, right) {
@@ -55,7 +102,7 @@ const flatten = function (root) {
   //后序遍历 主操作
   let l = root.left
   let r = root.right
-
+  
   root.left = null
   root.right = l
   //将原先的右子树接到当前右子树的末端
@@ -94,7 +141,7 @@ const invertTree = function (root) {
   root.right = temp
   invertTree(root.left)
   invertTree(root.right)
-
+  
   return root
 }
 //lc-101 递归
@@ -122,7 +169,20 @@ const isSymmetric = function (root) {
 }
 //lc-111
 const minDepth = function (root) {
-
+  if (root === null) {
+    return 0
+  }
+  if (root.left === null && root.right === null) {
+    return 1
+  }
+  let min = Infinity
+  if (root.left !== null) {
+    min = Math.min(minDepth(root.left), min)
+  }
+  if (root.right !== null) {
+    min = Math.min(minDepth(root.right), min)
+  }
+  return min + 1
 }
 //lc-104
 const maxDepth = function (root) {
@@ -147,6 +207,57 @@ const isSameTree = function (p, q) {
   }
   return isSameTree(p.left, q.left) && isSameTree(p.right, q.right)
 }
+
+
+//DFS 深度优先
+const dfs = function (root) {
+  if (root === null) {
+    return
+  }
+  
+  dfs(root.left)
+  dfs(root.right)
+}
+//BFS 广度优先
+const bfs = function (root) {
+  let arr = []
+  arr.push(root)
+  while (arr.length) {
+    let node = arr.shift()
+    if (node.left !== null) {
+      arr.push(node.left)
+    }
+    if (node.right !== null) {
+      arr.push(node.right)
+    }
+  }
+}
+//lc-102 层序遍历
+const levelOrder = function (root) {
+  let res = []
+  let arr = []
+  if (!root) {
+    return []
+  }
+  arr.push(root)
+  while (arr.length) {
+    let n = arr.length
+    let level = []
+    for (let i = 0; i < n; i++) {
+      let node = arr.shift()
+      level.push(node.val)
+      if (node.left !== null) {
+        arr.push(node.left)
+      }
+      if (node.right !== null) {
+        arr.push(node.right)
+      }
+    }
+    res.push(level)
+  }
+  return res
+}
+
 //lc-145 后续遍历 迭代
 const postorderTraversal = function (root) {
   let stack = []
@@ -188,12 +299,12 @@ const inorderTraversal = function (root) {
     // result.push(node.val)
     // handler(node.left)
     // handler(node.right)
-
+    
     //中序
     handler(node.left)
     result.push(node.val)
     handler(node.right)
-
+    
     //后序
     // handler(node.left)
     // handler(node.right)
@@ -337,7 +448,7 @@ const findNthDigit = function (n) {
   let digit = 1 //数位 1十位 2百位 3千位等
   let start = 1 //起始点数（个位1，十位10，百位100）
   let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
-
+  
   while (n > count) {
     //找出n属于哪个数位里的索引
     n -= count
@@ -475,6 +586,24 @@ let lengthOfLongestSubstring = function (s) {
   return result
 }
 
+const lengthOfLongestSubstring2 = function (s) {
+  let left = 0
+  let right = 0
+  let maxlen = 0
+  let set = new Set()
+  while (right < s.length) {
+    if (set.has(s[right])) {
+      maxlen = Math.max(maxlen, right - left)
+      // right++
+      left++
+    }
+    set.add(s[right])
+    right++
+  }
+  return maxlen
+  
+}
+console.log('lc-3', lengthOfLongestSubstring2('pwwkew'))
 // lengthOfLongestSubstring('abcabcbb')
 
 //lc-4
@@ -726,7 +855,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-
+  
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -803,16 +932,14 @@ const maxSubArray = function (nums) {
   //   max = Math.max(max, pre)
   // })
   // return max
-  let dp = []
-  dp[0] = nums[0] //边界值
-  let max = nums[0]
-  for (let i = 1; i <= nums.length; i++) {
-    dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]) //状态转移方程
-    if (max < dp[i]) {
-      max = dp[i]
-    }
+  
+  //dp[i] = Math.max(dp[i-1]+nums[i], dp[i-1])
+  //dp[0] = nums[0]
+  let dp = [nums[0]]
+  for (let i = 1; i < nums.length; i++) {
+    dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]) //如果nums[i]都大于dp[i-1]+nums[i]了，说明dp[i-1]对于nums[i]是负增益，所以肯定取nums[i]
   }
-  return max
+  return Math.max(...dp)
 }
 // console.log(maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]))
 
@@ -958,7 +1085,7 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-
+  
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
@@ -972,12 +1099,12 @@ const rob2 = function (nums) {
   }
   let dp1 = []
   let dp2 = []
-
+  
   dp1[0] = 0
   dp1[1] = nums[1]
   dp2[0] = nums[0]
   dp2[1] = Math.max(nums[0], nums[1])
-
+  
   for (let i = 2; i < nums.length; i++) {
     dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
   }
@@ -989,7 +1116,19 @@ const rob2 = function (nums) {
 console.log('lc-213', rob2([1, 2, 3, 1]))
 
 
-
+//lc-344
+const reverseString = function (s) {
+  let left = 0
+  let right = s.length - 1
+  let n = Math.floor(s.length / 2)
+  for (let i = 0; i < n; i++) {
+    let temp = s[left]
+    s[left] = s[right]
+    s[right] = temp
+    left++
+    right--
+  }
+}
 
 
 
