@@ -1,16 +1,106 @@
 //https://labuladong.gitbook.io/algo/
+//lc-409
+const longestPalindrome409 = function (s) {
+  // let map = {}
+  // for (let i = 0; i < s.length; i++) {
+  //   if (map[s[i]] === undefined) {
+  //     map[s[i]] = 1
+  //   } else {
+  //     map[s[i]]++
+  //   }
+  // }
+  // // console.log(map)
+  // let maxLen = 0
+  // let center = 0
+  // for (const key in map) {
+  //   if (map[key] % 2 === 1) {
+  //     center = Math.max(center, map[key])
+  //   }
+  //   if (map[key] % 2 === 0) {
+  //     maxLen += map[key]
+  //
+  //   }
+  // }
+  // return maxLen + center
+  let count = 0
+  let set = new Set()
+  for (let i = 0; i < s.length; i++) {
+    if (set.has(s[i])) {
+      set.delete(s[i])
+      count += 2
+    } else {
+      set.add(s[i])
+    }
+  }
+  if (set.size > 0) {
+    return count + 1
+  } else {
+    return count
+  }
+}
+console.log('lc-409', longestPalindrome409('bb'))
+//lc-125
+const isPalindrome125 = function (s) {
+  if (!s) {
+    return true
+  }
+  let arr = s.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()
+  let n = Math.floor((arr.length + 1) / 2) //aabaa
+  for (let i = 0; i < n; i++) {
+    if (arr[i] !== arr[arr.length - i - 1]) {
+      return false
+    }
+  }
+  return true
+}
+console.log('lc-125', isPalindrome125('A man, a plan, a canal: Panama'))
+//lc-35
+const searchInsert = function (nums, target) {
+  let n = 0
+  while (n < nums.length) {
+    if (nums[n] === target) {
+      return n
+    } else {
+      if (n === 0 && nums[n] > target) {
+        return 0
+      } else if (nums[n + 1] && nums[n + 1] > target) {
+        return n + 1
+      } else if (n === nums.length - 1 && nums[n] < target) {
+        return n + 1
+      }
+    }
+    n++
+  }
+}
+console.log('lc-35', searchInsert([1, 3, 5, 6], 5))
 //lc-64
 const minPathSum = function (grid) {
   //dp[i][j] = Math.min(dp[i-1][j]+grid[i][j], dp[i][j-1]+grid[i][j])
   //dp[0][0] = grid[0][0]
   let row = grid.length
   let col = grid[0].length
+  let dp = new Array(row).fill(new Array(col))
+  let min = Infinity
+  dp[0][0] = grid[0][0]
+  for (let i = 0; i < row; i++) {
+    for (let j = 0; j < col; j++) {
+      if (i === 0 && j !== 0) {
+        dp[i][j] = dp[i][j - 1] + grid[i][j]
+      } else if (i !== 0 && j === 0) {
+        dp[i][j] = dp[i - 1][j] + grid[i][j]
+      } else if (i !== 0 && j !== 0) {
+        dp[i][j] = Math.min(dp[i - 1][j] + grid[i][j], dp[i][j - 1] + grid[i][j])
+      }
+    }
+  }
+  return dp[row - 1][col - 1]
 }
+console.log('lc-64', minPathSum([[1, 3, 1], [1, 5, 1], [4, 2, 1]]))
 //lc-239 滑动窗口
 const maxSlidingWindow = function (nums, k) {
   let left = 0
   let right = k - 1
-  
+
 }
 //lc-283
 const moveZeroes = function (nums) {
@@ -94,6 +184,22 @@ const constructMaximumBinaryTree = function (nums) {
   }
   return handler(nums, 0, nums.length - 1)
 }
+//lc-110
+const isBalanced = function (root) {
+  let handler = (node) => {
+    if (node === null) {
+      return 0
+    } else {
+      return Math.max(handler(node.left), handler(node.right)) + 1
+    }
+  }
+  if (root === null) {
+    return true
+  } else {
+    return Math.abs(handler(root.left) - handler(root.right)) <= 1 && isBalanced(root.left) && isBalanced(root.right)
+  }
+}
+
 //lc-114
 const flatten = function (root) {
   if (root === null) {
@@ -105,7 +211,7 @@ const flatten = function (root) {
   //后序遍历 主操作
   let l = root.left
   let r = root.right
-  
+
   root.left = null
   root.right = l
   //将原先的右子树接到当前右子树的末端
@@ -144,7 +250,7 @@ const invertTree = function (root) {
   root.right = temp
   invertTree(root.left)
   invertTree(root.right)
-  
+
   return root
 }
 //lc-101 递归
@@ -187,6 +293,16 @@ const minDepth = function (root) {
   }
   return min + 1
 }
+//lc-112
+const hasPathSum = function (root, targetSum) {
+  if (!root) {
+    return false
+  }
+  if (!root.left && !root.right) {
+    return root.val === targetSum
+  }
+  return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val)
+}
 //lc-104
 const maxDepth = function (root) {
   if (!root) {
@@ -217,7 +333,7 @@ const dfs = function (root) {
   if (root === null) {
     return
   }
-  
+
   dfs(root.left)
   dfs(root.right)
 }
@@ -302,12 +418,12 @@ const inorderTraversal = function (root) {
     // result.push(node.val)
     // handler(node.left)
     // handler(node.right)
-    
+
     //中序
     handler(node.left)
     result.push(node.val)
     handler(node.right)
-    
+
     //后序
     // handler(node.left)
     // handler(node.right)
@@ -451,7 +567,7 @@ const findNthDigit = function (n) {
   let digit = 1 //数位 1十位 2百位 3千位等
   let start = 1 //起始点数（个位1，十位10，百位100）
   let count = digit * 9 * start //该数位共有多少个索引数（不是数字个数）
-  
+
   while (n > count) {
     //找出n属于哪个数位里的索引
     n -= count
@@ -604,7 +720,7 @@ const lengthOfLongestSubstring2 = function (s) {
     right++
   }
   return maxlen
-  
+
 }
 console.log('lc-3', lengthOfLongestSubstring2('pwwkew'))
 // lengthOfLongestSubstring('abcabcbb')
@@ -858,7 +974,7 @@ let mergeTwoLists = function (l1, l2) {
     return l2
   }
   // const prehead = new ListNode(-1);
-  
+
   // let prev = prehead;
   // while (l1 != null && l2 != null) {
   //   if (l1.val <= l2.val) {
@@ -935,7 +1051,7 @@ const maxSubArray = function (nums) {
   //   max = Math.max(max, pre)
   // })
   // return max
-  
+
   //dp[i] = Math.max(dp[i-1]+nums[i], dp[i-1])
   //dp[0] = nums[0]
   let dp = [nums[0]]
@@ -1088,7 +1204,7 @@ const rob = function (nums) {
     dp[i] = Math.max(dp[i - 2] + nums[i], dp[i - 1])
   }
   return dp[nums.length - 1]
-  
+
 }
 console.log('lc-198', rob([1, 1, 1, 2]))
 
@@ -1102,12 +1218,12 @@ const rob2 = function (nums) {
   }
   let dp1 = []
   let dp2 = []
-  
+
   dp1[0] = 0
   dp1[1] = nums[1]
   dp2[0] = nums[0]
   dp2[1] = Math.max(nums[0], nums[1])
-  
+
   for (let i = 2; i < nums.length; i++) {
     dp1[i] = Math.max(dp1[i - 2] + nums[i], dp1[i - 1])
   }
