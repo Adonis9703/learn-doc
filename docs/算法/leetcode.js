@@ -1,7 +1,10 @@
 //https://labuladong.gitbook.io/algo/
 //lc-64
 const minPathSum = function (grid) {
-
+  //dp[i][j] = Math.min(dp[i-1][j]+grid[i][j], dp[i][j-1]+grid[i][j])
+  //dp[0][0] = grid[0][0]
+  let row = grid.length
+  let col = grid[0].length
 }
 //lc-239 滑动窗口
 const maxSlidingWindow = function (nums, k) {
