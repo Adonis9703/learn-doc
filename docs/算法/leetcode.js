@@ -1,4 +1,318 @@
 //https://labuladong.gitbook.io/algo/
+//lc-153
+const findMin = function(nums) {
+  let low = 0;
+  let high = nums.length - 1;
+  while (low < high) {
+    const pivot = low + Math.floor((high - low) / 2);
+    if (nums[pivot] < nums[high]) {
+      high = pivot;
+    } else {
+      low = pivot + 1;
+    }
+  }
+  return nums[low];
+}
+//lc-49
+const groupAnagrams = function (strs) {
+  const map = new Map()
+  for (let i = 0; i < strs.length; i++) {
+    let arr = strs[i].split('')
+    arr.sort()
+    let str = arr.join('')
+    let list = []
+    if (map.get(str)) {
+      list = map.get(str)
+      list.push(strs[i])
+      map.set(str, list)
+    } else {
+      map.set(str, [strs[i]])
+    }
+  }
+  return Array.from(map.values())
+}
+console.log('lc-40', groupAnagrams(["eat", "tea", "tan", "ate", "nat", "bat"]))
+//lc-209
+const minSubArrayLen = function (target, nums) {
+  let left = 0
+  let right = 0
+  let min = Infinity
+  let sum = 0
+  while (right < nums.length) {
+    sum += nums[right]
+    while (sum >= target) {
+      min = Math.min(min, right - left + 1)
+      sum -= nums[left]
+      left++
+    }
+    right++
+  }
+  return min === Infinity ? 0 : min
+}
+console.log('lc-209', minSubArrayLen(7, [2, 3, 1, 2, 4, 3]))
+//lc-204
+const countPrimes = function (n) {
+  // const isPrime = x => {
+  //   for (let i = 2; i * i <= x; i++) {
+  //     if (x % i === 0) {
+  //       return false
+  //     }
+  //   }
+  //   return true
+  // }
+  // let ans = 0
+  // let result = []
+  // for (let i = 2; i < n; i++) {
+  //   if (isPrime(i)) {
+  //     result.push(i)
+  //     ans+=1
+  //   }
+  //   // ans += isPrime(i)
+  // }
+  // console.log(result)
+  // return ans
+  const isPrime = new Array(n).fill(1)
+  let ans = 0
+  for (let i = 2; i < n; i++) {
+    if (isPrime[i]) {
+      ans += 1
+      for (let j = i * i; j < n; j += i) {
+        isPrime[j] = 0
+      }
+    }
+  }
+  return ans
+}
+console.log('lc-204', countPrimes(10))
+//lc-202
+const isHappy = function (n) {
+  // const handler = (arr) => {
+  //   let sum = 0
+  //   arr.forEach(a => {
+  //     sum = sum + a * a
+  //   })
+  //   if (sum === 1) {
+  //     return true
+  //   } else if (sum > 1 && sum < 10) {
+  //     return false
+  //   } else {
+  //     let newArr = sum.toString().split('').map(item => Number(item))
+  //     handler(newArr)
+  //   }
+  // }
+  // return handler(n.toString().split('').map(item => Number(item)))
+}
+console.log('lc-202', isHappy(19))
+//lc-268
+const missingNumber = function (nums) {
+  let n = nums.length
+  for (let i = 0; i <= n; i++) {
+    if (!nums.includes(i)) {
+      return i
+    }
+  }
+}
+console.log('lc-268', missingNumber([9, 6, 4, 2, 3, 5, 7, 0, 1]))
+//lc-56
+const merge56 = function (intervals) {
+  let slow = 0
+  let fast = 1
+  if (intervals.length === 1) {
+    return intervals
+  }
+  intervals.sort((a, b) => a[0] - b[0])
+  while (fast < intervals.length) {
+    if (intervals[slow][1] >= intervals[fast][0]) {
+      let start = intervals[slow][0]
+      let end = Math.max(intervals[fast][1], intervals[slow][1])
+      intervals[fast] = [start, end]
+      intervals.splice(slow, 1)
+    } else {
+      slow++
+      fast++
+    }
+  }
+  return intervals
+}
+console.log('lc-56', merge56([[2, 3], [2, 2], [3, 3], [1, 3], [5, 7], [2, 2], [4, 6]]))
+//1,3 2,2 2,2 2,3 3,3 4,6 4,7
+//lc-617
+const mergeTrees = function (root1, root2) {
+  if (root1 === null) {
+    return root2
+  }
+  if (root2 === null) {
+    return root1
+  }
+  let root = new TreeNode(root1.val + root2.val)
+  root.left = mergeTrees(root1.left, root2.left)
+  root.right = mergeTrees(root1.right, root2.right)
+  return root
+}
+//lc-43
+const multiply = function (num1, num2) {
+  let len1 = num1.length
+  let len2 = num2.length
+  const pos = new Array(len1 + len2).fill(0)
+  // 为什么是两层for循环 因为 456*3 每个数都要跟3乘一遍
+  for (let i = len1 - 1; i >= 0; i--) {
+    let n1 = +num1[i]
+    for (let j = len2 - 1; j >= 0; j--) {
+      let n2 = +num2[j]
+      // len1+len2 =len1-1+len2-1+1
+      let sum = pos[i + j + 1] + n1 * n2
+      pos[i + j + 1] = sum % 10 // 取模的值
+      // pos[i+j]相当于进一 就是carry
+      pos[i + j] += sum / 10 | 0
+    }
+  }
+  while (pos[0] === 0) {
+    pos.shift()
+  }
+  return pos.length ? pos.join('') : '0';
+}
+console.log('lc-43', multiply('2', '3'))
+//lc-171
+const titleToNumber = function (columnTitle) {
+  let res = 0
+  for (let i = 0; i < columnTitle.length; i++) {
+    let num = columnTitle[i].charCodeAt() - 'A'.charCodeAt() + 1
+    res = res * 26 + num
+  }
+  return res
+}
+console.log('lc-171', titleToNumber('AB'))
+//lc-412
+const fizzBuzz = function (n) {
+  let result = []
+  for (let i = 1; i <= n; i++) {
+    if (i % 3 === 0 && i % 5 === 0) {
+      result.push('FizzBuzz')
+    } else if (i % 3 === 0) {
+      result.push('Fizz')
+    } else if (i % 5 === 0) {
+      result.push('Buzz')
+    } else {
+      result.push(i)
+    }
+  }
+  return result
+}
+console.log('lc-412', fizzBuzz(15))
+//lc-83
+const deleteDuplicates = function (head) {
+  if (!head) {
+    return head
+  }
+  let node = head
+  while (node.next) {
+    if (node.val === node.next.val) {
+      node.next = node.next.next
+    } else {
+      node = node.next
+    }
+  }
+  return head
+}
+//lc-203
+const removeElements = function (head, val) {
+  let pre = new ListNode(0)
+  pre.next = head
+  let node = pre
+  while (node.next) {
+    if (node.next.val === val) {
+      node.next = node.next.next
+    } else {
+      node = node.next
+    }
+  }
+  return pre.next
+}
+//lc-242
+const isAnagram = function (s, t) {
+  let strS = s.split('').sort().join('')
+  let strT = t.split('').sort().join('')
+  return strS === strT
+}
+console.log('lc-242', isAnagram('rat', 'car'))
+//lc-383
+const canConstruct = function (ransomNote, magazine) {
+  let map = {}
+  for (let i = 0; i < ransomNote.length; i++) {
+    if (map[ransomNote[i]] === undefined) {
+      map[ransomNote[i]] = 1
+    } else {
+      map[ransomNote[i]]++
+    }
+  }
+  for (let i = 0; i < magazine.length; i++) {
+    if (map[magazine[i]]) {
+      map[magazine[i]]--
+    }
+  }
+  for (const key in map) {
+    if (map[key] > 0) {
+      return false
+    }
+  }
+  return true
+
+  // let right = 0
+  // let arr1 = ransomNote.split('')
+  // let arr2 = magazine.split('')
+  // if (arr1.length > arr2.length) {
+  //   return false
+  // }
+  // while (right < arr2.length && arr1.length) {
+  //   if (arr1[0] === arr2[right]) {
+  //     arr1.shift()
+  //     arr2.splice(right, 1)
+  //     right = 0
+  //   } else {
+  //     right++
+  //   }
+  // }
+  // return arr1.length === 0
+}
+console.log('lc-383', canConstruct('aab', 'baa'))
+//lc-1662
+const arrayStringsAreEqual = function (word1, word2) {
+  let str1 = word1.join('')
+  let str2 = word2.join('')
+  return str1 === str2
+}
+console.log('lc-1662', arrayStringsAreEqual(['ab', 'c'], ['a', 'bc']))
+//lc-724
+const pivotIndex = function (nums) {
+  const total = nums.reduce((a, b) => a + b, 0)
+  let sumL = 0
+  for (let i = 0; i < nums.length; i++) {
+    if (sumL === total - sumL - nums[i]) {
+      return i
+    }
+    sumL += nums[i]
+  }
+  return -1
+}
+console.log('lc-724', pivotIndex([2, 1, -1]))
+//lc-45
+const jump = function (nums) {
+
+}
+//lc-55
+const canJump = function (nums) {
+  let maxlen = nums[0]
+  for (let i = 0; i < nums.length; i++) {
+    if (i <= maxlen) {
+      maxlen = Math.max(maxlen, i + nums[i])
+      if (maxlen >= nums.length - 1) {
+        return true
+      }
+    }
+  }
+  return false
+}
+console.log('lc-55', canJump([2, 0, 0]))
 //lc-409
 const longestPalindrome409 = function (s) {
   // let map = {}
