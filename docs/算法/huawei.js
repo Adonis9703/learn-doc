@@ -1,3 +1,13 @@
+/***
+ * 给定一个字符串 s 和 p，请问最少去掉s中的多少个字符，
+ * 才能使得p是s的字串呢
+ *
+ * s和p只包含小写英文字母，s的长度不超过2000，p的长度不超过10，保证有解
+ * @param s
+ * @param p
+ * @returns {*}
+ */
+
 const handler = (s, p) => {
   if (s.includes(p)) {
     return 0
