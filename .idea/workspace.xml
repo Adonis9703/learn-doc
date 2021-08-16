@@ -243,8 +243,8 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1331" />
-    <option name="y" value="405" />
+    <option name="x" value="1254" />
+    <option name="y" value="302" />
     <option name="width" value="1294" />
     <option name="height" value="1087" />
   </component>
@@ -280,7 +280,7 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1629107847651" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1629107864709" />
     <property name="last_opened_file_path" value="$USER_HOME$/Desktop/Byte Dance" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
