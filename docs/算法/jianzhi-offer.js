@@ -1,3 +1,18 @@
+//54
+const kthLargest = function (root, k) {
+  let arr = []
+  let handler = (node) => {
+    if (!node) {
+      return
+    }
+    arr.push(node.val)
+    handler(node.left)
+    handler(node.right)
+  }
+  handler(root)
+  arr.sort((a, b) => b - a)
+  return arr[k - 1]
+}
 //50
 const firstUniqChar = function (s) {
   let map = {}
